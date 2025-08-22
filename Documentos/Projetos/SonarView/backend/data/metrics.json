@@ -1,0 +1,119 @@
+[
+  {
+    "timestamp": "2025-08-22T06:48:16.894Z",
+    "projectKey": "gabrielsoaressn_clone-fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 64,
+      "technicalDebt": 518,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 0,
+      "new": 0
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": 0
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 0
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 518
+  },
+  {
+    "timestamp": "2025-08-22T06:49:16.404Z",
+    "projectKey": "gabrielsoaressn_clone-fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 64,
+      "technicalDebt": 518,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 0,
+      "new": 0
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": 0
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 0
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 518
+  },
+  {
+    "timestamp": "2025-08-22T06:50:00.410Z",
+    "projectKey": "gabrielsoaressn_clone-fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 64,
+      "technicalDebt": 518,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 0,
+      "new": 0
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": 0
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 0
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 518
+  }
+]
