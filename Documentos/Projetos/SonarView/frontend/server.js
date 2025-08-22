@@ -27,6 +27,7 @@ async function serveFile(filePath, res) {
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(data);
   } catch (error) {
+    console.error('Erro ao servir arquivo:', error);
     res.writeHead(404, { 'Content-Type': 'text/plain' });
     res.end('Arquivo não encontrado');
   }
