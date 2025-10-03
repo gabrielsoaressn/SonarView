@@ -4,9 +4,10 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 import requests
+import os
 from datetime import datetime, timedelta
 
-API_URL = "http://localhost:3001/api"
+API_URL = os.getenv("BACKEND_API_URL", "https://sonarview-1.onrender.com/api")
 
 @st.cache_data(ttl=300)
 def get_projects():
