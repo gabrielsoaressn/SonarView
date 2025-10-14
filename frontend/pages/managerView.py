@@ -34,7 +34,7 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.metric(
         label="Taxa de Dívida Técnica",
-        value=f"{maintainability.get('debtRatio', 0)}%",
+        value=f"{maintainability.get('debtRatio', '*' )}%",
         help="Proporção do esforço de refatoração necessário em relação ao custo de desenvolvimento."
     )
 with col2:
@@ -46,13 +46,13 @@ with col2:
 with col3:
     st.metric(
         label="Lead Time para Mudanças",
-        value="2.5 dias", # Mocked data
+        value="*", # Mocked data
         help="Tempo médio desde o commit até a produção."
     )
 with col4:
     st.metric(
         label="Change Failure Rate",
-        value="8%", # Mocked data
+        value="*", # Mocked data
         help="Percentual de deploys que causam falhas em produção."
     )
 
@@ -62,9 +62,9 @@ new_code = latest_data.get('newCode', {})
 
 col1, col2 = st.columns(2)
 with col1:
-    st.metric("Novos Bugs", new_code.get('bugs', 0), delta_color="inverse")
+    st.metric("Novos Bugs", new_code.get('bugs', '*'), delta_color="inverse")
 with col2:
-    st.metric("Novas Vulnerabilidades", new_code.get('vulnerabilities', 0), delta_color="inverse")
+    st.metric("Novas Vulnerabilidades", new_code.get('vulnerabilities', '*'), delta_color="inverse")
 
 # --- Visualizações ---
 st.header("Análise Visual", divider='blue')

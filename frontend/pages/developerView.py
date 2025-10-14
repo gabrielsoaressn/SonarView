@@ -31,15 +31,15 @@ new_code = latest_data.get('newCode', {})
 
 col1, col2, col3 = st.columns(3)
 with col1:
-    st.metric("Novos Bugs", new_code.get('bugs', 0), delta_color="inverse")
+    st.metric("Novos Bugs", new_code.get('bugs', '*'), delta_color="inverse")
 with col2:
-    st.metric("Novas Vulnerabilidades", new_code.get('vulnerabilities', 0), delta_color="inverse")
+    st.metric("Novas Vulnerabilidades", new_code.get('vulnerabilities', '*'), delta_color="inverse")
 with col3:
-    st.metric("Novos Code Smells", new_code.get('codeSmells', 0), delta_color="inverse")
+    st.metric("Novos Code Smells", new_code.get('codeSmells', '*'), delta_color="inverse")
 
 # Tabela de Problemas (mock)
 st.subheader("Tabela de Problemas em Código Novo")
-st.info("Esta seção listaria os problemas específicos encontrados no código novo, permitindo navegação direta para o SonarCloud. (Funcionalidade em desenvolvimento)")
+st.info("*")
 
 # --- Hotspots de Código ---
 st.header("Hotspots de Código para Refatoração", divider='orange')
@@ -54,20 +54,7 @@ with col2:
 
 # Sunburst de Complexidade (mock)
 st.subheader("Complexidade por Módulo/Classe")
-mock_sunburst_data = {
-    'ids': ["Projeto", "Modulo A", "Modulo B", "Modulo A.1", "Modulo A.2", "Modulo B.1"],
-    'parents': ["", "Projeto", "Projeto", "Modulo A", "Modulo A", "Modulo B"],
-    'values': [60, 35, 25, 15, 20, 25]
-}
-fig_sunburst = px.sunburst(
-    mock_sunburst_data,
-    ids='ids',
-    parents='parents',
-    values='values',
-    title="Distribuição de Complexidade Ciclomática"
-)
-fig_sunburst.update_layout(height=450)
-st.plotly_chart(fig_sunburst, use_container_width=True)
+st.info("*")
 
 # --- Qualidade dos Testes ---
 st.header("Qualidade e Cobertura de Testes", divider='orange')
@@ -97,5 +84,5 @@ with col1:
 with col2:
     # Linhas não cobertas (mock)
     st.subheader("Linhas Não Cobertas por Testes")
-    st.metric("Linhas a cobrir", "125", help="Número total de linhas de código que não estão cobertas por testes.")
-    st.info("Uma tabela detalhada com os arquivos e linhas específicas seria exibida aqui.")
+    st.metric("Linhas a cobrir", "*", help="Número total de linhas de código que não estão cobertas por testes.")
+    st.info("*")
