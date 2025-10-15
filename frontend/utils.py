@@ -47,7 +47,11 @@ def get_metrics_history(project_id, hours=168): # 7 dias
 def format_rating(rating):
     """Formata o rating para exibição (A, B, C, D, E)."""
     rating_map = {1.0: 'A', 2.0: 'B', 3.0: 'C', 4.0: 'D', 5.0: 'E'}
-    return rating_map.get(rating, rating)
+    try:
+        rating_float = float(rating)
+        return rating_map.get(rating_float, rating)
+    except (ValueError, TypeError):
+        return rating
 
 def get_rating_color(rating):
     """Retorna uma cor baseada no rating."""
