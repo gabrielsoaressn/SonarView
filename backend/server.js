@@ -283,10 +283,10 @@ app.get('/api/projects', (req, res) => {
 
 // Health check
 app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'healthy', 
+  res.json({
+    status: 'healthy',
     timestamp: new Date().toISOString(),
-    service: 'Aurora View API'
+    service: 'Quality Lens API'
   });
 });
 
@@ -299,7 +299,7 @@ async function startServer() {
   setInterval(collectMetrics, 10 * 60 * 1000);
   
   app.listen(PORT, () => {
-    console.log(`🚀 Aurora View Backend rodando em http://localhost:${PORT}`);
+    console.log(`🚀 Quality Lens Backend rodando em http://localhost:${PORT}`);
     console.log('📊 Coleta de métricas automática ativada (a cada 10 minutos)');
   });
 }

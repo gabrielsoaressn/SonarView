@@ -5,8 +5,8 @@ from utils import display_sidebar, get_latest_metrics, render_no_data, format_ra
 # CONFIGURAÇÃO DA PÁGINA
 # ==========================================
 st.set_page_config(
-    page_title="Aurora View - Início",
-    page_icon="🌅",
+    page_title="Quality Lens - Início",
+    page_icon="🔍",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -57,7 +57,7 @@ def main():
     # Header
     st.markdown("""
         <div class="main-header">
-            <h1>🌅 Aurora View</h1>
+            <h1>🔍 Quality Lens</h1>
             <p>Um dashboard unificado para monitoramento de dívida técnica.</p>
         </div>
     """, unsafe_allow_html=True)

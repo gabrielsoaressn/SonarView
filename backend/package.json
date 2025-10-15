@@ -1,7 +1,7 @@
 {
-  "name": "aurora-view-backend",
+  "name": "quality-lens-backend",
   "version": "1.0.0",
-  "description": "API do Aurora View para coleta de métricas do SonarCloud",
+  "description": "API do Quality Lens para coleta de métricas do SonarCloud",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

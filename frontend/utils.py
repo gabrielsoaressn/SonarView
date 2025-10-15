@@ -60,7 +60,7 @@ def get_rating_color(rating):
 
 def display_sidebar():
     """Exibe a sidebar com seleção de projeto e navegação."""
-    st.sidebar.title("🌅 Aurora View")
+    st.sidebar.title("🔍 Quality Lens")
     st.sidebar.markdown("Dashboard de Dívida Técnica")
 
     projects_data = get_projects()
