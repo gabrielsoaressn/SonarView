@@ -1,3 +1,4 @@
+require('dotenv').config();
 // backend/server.js
 const express = require('express');
 const cors = require('cors');
@@ -17,10 +18,10 @@ const SONARCLOUD_CONFIG = {
   baseUrl: 'https://sonarcloud.io/api',
   token: process.env.SONARCLOUD_TOKEN || '1d031b3852fefb184a4a79dc6de9c8b96df5b818',
   projects: {
-    'clone-fklearn': 'gabrielsoaressn_clone-fklearn',
+    'fklearn': 'gabrielsoaressn_fklearn',
     'commons-lang': 'gabrielsoaressn_commons-lang'
   },
-  defaultProject: 'clone-fklearn'
+  defaultProject: 'fklearn'
 };
 
 // Caminho para arquivo de dados
@@ -79,44 +80,51 @@ function transformMeasures(data, projectKey) {
     });
   }
 
+  const parseNumeric = (value, isFloat = false) => {
+    if (value === null || value === undefined || value === '' || isNaN(Number(value))) {
+      return '*';
+    }
+    return isFloat ? parseFloat(value) : parseInt(value, 10);
+  };
+
   return {
     timestamp: new Date().toISOString(),
     projectKey: projectKey,
     reliability: {
-      bugs: 12,// parseInt(measures.bugs || 12),
-      rating: 'C',// measures.reliability_rating || 'C',
-      remediationEffort: '360'//parseInt(measures.reliability_remediation_effort || 360)
+      bugs: parseNumeric(measures.bugs),
+      rating: measures.reliability_rating || '*',
+      remediationEffort: parseNumeric(measures.reliability_remediation_effort)
     },
     security: {
-      vulnerabilities: 4,// parseInt(measures.vulnerabilities || 4),
-      rating: 'B',// measures.security_rating || 'B',
-      remediationEffort: 120//parseInt(measures.security_remediation_effort || 120)
+      vulnerabilities: parseNumeric(measures.vulnerabilities),
+      rating: measures.security_rating || '*',
+      remediationEffort: parseNumeric(measures.security_remediation_effort)
     },
     maintainability: {
-      codeSmells: parseInt(measures.code_smells || 0),
-      technicalDebt: parseInt(measures.sqale_index || 0),
-      debtRatio: parseFloat(measures.sqale_debt_ratio || 0),
-      rating: measures.sqale_rating || 'A'
+      codeSmells: parseNumeric(measures.code_smells),
+      technicalDebt: parseNumeric(measures.sqale_index),
+      debtRatio: parseNumeric(measures.sqale_debt_ratio, true),
+      rating: measures.sqale_rating || '*'
     },
     coverage: {
-      overall: 94.4,//parseFloat(measures.coverage || 94.4),
-      new: 94.5//parseFloat(measures.new_coverage || 94.5)
+      overall: parseNumeric(measures.coverage, true),
+      new: parseNumeric(measures.new_coverage, true)
     },
     duplication: {
-      density: parseFloat(measures.duplicated_lines_density || 0),
-      newDensity: parseFloat(measures.new_duplicated_lines_density || 0)
+      density: parseNumeric(measures.duplicated_lines_density, true),
+      newDensity: parseNumeric(measures.new_duplicated_lines_density, true)
     },
     size: {
-      linesOfCode: parseInt(measures.ncloc || 0),
-      complexity: parseInt(measures.complexity || 0)
+      linesOfCode: parseNumeric(measures.ncloc),
+      complexity: parseNumeric(measures.complexity)
     },
     newCode: {
-      bugs: 2,//parseInt(measures.new_bugs || 0),
-      vulnerabilities: 1,//parseInt(measures.new_vulnerabilities || 0),
-      codeSmells: 8//parseInt(measures.new_code_smells || 0)
+      bugs: parseNumeric(measures.new_bugs),
+      vulnerabilities: parseNumeric(measures.new_vulnerabilities),
+      codeSmells: parseNumeric(measures.new_code_smells)
     },
     overallRating: calculateOverallRating(measures),
-    technicalDebtMinutes: parseInt(measures.sqale_index || 0)
+    technicalDebtMinutes: parseNumeric(measures.sqale_index)
   };
 }
 

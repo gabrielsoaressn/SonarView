@@ -7,7 +7,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 
-API_URL = os.getenv("BACKEND_API_URL", "https://sonarview-1.onrender.com/api")
+API_URL = os.getenv("BACKEND_API_URL", "https://recebe-dados-sonarcloud.onrender.com/api")
 
 @st.cache_data(ttl=300)
 def get_projects():
