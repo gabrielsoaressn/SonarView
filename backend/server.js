@@ -137,8 +137,8 @@ function calculateOverallRating(measures) {
   ].filter(Boolean);
 
   if (ratings.length === 0) return 'A';
-  
-  const ratingOrder = { 'A': 1, 'B': 2, 'C': 3, 'D': 4, 'E': 5 };
+
+  const ratingOrder = { 'A': 5, 'B': 4, 'C': 3, 'D': 2, 'E': 1 };
   return ratings.reduce((worst, current) => {
     return ratingOrder[current] > ratingOrder[worst] ? current : worst;
   });
