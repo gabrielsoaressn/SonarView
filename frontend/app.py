@@ -95,13 +95,14 @@ st.markdown("""
 
 def letter_to_numeric(rating):
     """
-    Converte rating de letra (A-E) para numérico (5.0-1.0)
+    Converte rating de letra (A-E) para numérico (1.0-5.0)
     Baseado no modelo SQALE do SonarQube
+    A = 1.0 (melhor), E = 5.0 (pior)
     """
     if rating == '*' or not rating:
-        return 0
-    rating_map = {'A': 5.0, 'B': 4.0, 'C': 3.0, 'D': 2.0, 'E': 1.0}
-    return rating_map.get(str(rating).upper(), 0)
+        return 6.0  # Pior que E para indicar ausência de dados
+    rating_map = {'A': 1.0, 'B': 2.0, 'C': 3.0, 'D': 4.0, 'E': 5.0}
+    return rating_map.get(str(rating).upper(), 6.0)
 
 def evaluate_quality_gate(data):
     """
@@ -137,8 +138,8 @@ def evaluate_quality_gate(data):
     debt_ratio = data.get('maintainability', {}).get('debtRatio', 0)
     
     # Lógica de avaliação
-    # CRÍTICO: Manutenibilidade crítica (1.0 ou E)
-    if maint_numeric <= 1.5:
+    # CRÍTICO: Manutenibilidade crítica (E = 5.0)
+    if maint_numeric >= 5.0:
         return {
             'status': 'CRITICAL',
             'label': 'CRÍTICO',
@@ -146,7 +147,7 @@ def evaluate_quality_gate(data):
             'color': 'critical',
             'message': 'Projeto apresenta problemas graves que exigem ação imediata'
         }
-    
+
     # REPROVADO: Bugs ou vulnerabilidades em código novo
     if new_bugs > 0 or new_vulnerabilities > 0:
         return {
@@ -156,11 +157,11 @@ def evaluate_quality_gate(data):
             'color': 'failed',
             'message': 'Código novo introduz bugs ou vulnerabilidades'
         }
-    
-    # REPROVADO: Múltiplas dimensões com rating ruim (D ou E)
+
+    # REPROVADO: Múltiplas dimensões com rating ruim (D ou E, >= 4.0)
     poor_ratings = sum([
-        1 for r in [maint_numeric, reliability_numeric, security_numeric] 
-        if r <= 2.5
+        1 for r in [maint_numeric, reliability_numeric, security_numeric]
+        if r >= 4.0
     ])
     if poor_ratings >= 2:
         return {
@@ -170,10 +171,17 @@ def evaluate_quality_gate(data):
             'color': 'failed',
             'message': 'Projeto não atende aos critérios mínimos de qualidade'
         }
-    
-    # ATENÇÃO: Rating C em alguma dimensão ou debt ratio alto
-    if (maint_numeric == 3.0 or reliability_numeric == 3.0 or 
-        security_numeric == 3.0 or debt_ratio > 5.0):
+
+    # ATENÇÃO: Pelo menos uma dimensão com Rating C (3.0) ou debt ratio alto
+    # Rating C está entre D (4.0) e B (2.0), então usamos 2.5 < r < 3.5
+    warning_conditions = [
+        2.5 < maint_numeric < 3.5,
+        2.5 < reliability_numeric < 3.5,
+        2.5 < security_numeric < 3.5,
+        debt_ratio > 5.0
+    ]
+
+    if any(warning_conditions):
         return {
             'status': 'WARNING',
             'label': 'ATENÇÃO',
