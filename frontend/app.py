@@ -95,14 +95,14 @@ st.markdown("""
 
 def letter_to_numeric(rating):
     """
-    Converte rating de letra (A-E) para numérico (1.0-5.0)
+    Converte rating de letra (A-E) para numérico (5.0-1.0)
     Baseado no modelo SQALE do SonarQube
-    A = 1.0 (melhor), E = 5.0 (pior)
+    A = 5.0 (melhor), E = 1.0 (pior) - escala de pontuação
     """
     if rating == '*' or not rating:
-        return 6.0  # Pior que E para indicar ausência de dados
-    rating_map = {'A': 1.0, 'B': 2.0, 'C': 3.0, 'D': 4.0, 'E': 5.0}
-    return rating_map.get(str(rating).upper(), 6.0)
+        return 0
+    rating_map = {'A': 5.0, 'B': 4.0, 'C': 3.0, 'D': 2.0, 'E': 1.0}
+    return rating_map.get(str(rating).upper(), 0)
 
 def evaluate_quality_gate(data):
     """
@@ -138,8 +138,8 @@ def evaluate_quality_gate(data):
     debt_ratio = data.get('maintainability', {}).get('debtRatio', 0)
     
     # Lógica de avaliação
-    # CRÍTICO: Manutenibilidade crítica (E = 5.0)
-    if maint_numeric >= 5.0:
+    # CRÍTICO: Manutenibilidade crítica (E = 1.0)
+    if maint_numeric < 1.5:
         return {
             'status': 'CRITICAL',
             'label': 'CRÍTICO',
@@ -148,8 +148,11 @@ def evaluate_quality_gate(data):
             'message': 'Projeto apresenta problemas graves que exigem ação imediata'
         }
 
-    # REPROVADO: Bugs ou vulnerabilidades em código novo
-    if new_bugs > 0 or new_vulnerabilities > 0:
+    # REPROVADO: Bugs ou vulnerabilidades em código novo (valores numéricos, não '*')
+    new_bugs_numeric = new_bugs if new_bugs != '*' else 0
+    new_vulns_numeric = new_vulnerabilities if new_vulnerabilities != '*' else 0
+
+    if new_bugs_numeric > 0 or new_vulns_numeric > 0:
         return {
             'status': 'FAILED',
             'label': 'REPROVADO',
@@ -158,10 +161,10 @@ def evaluate_quality_gate(data):
             'message': 'Código novo introduz bugs ou vulnerabilidades'
         }
 
-    # REPROVADO: Múltiplas dimensões com rating ruim (D ou E, >= 4.0)
+    # REPROVADO: Múltiplas dimensões com rating ruim (D ou E, <= 2.0)
     poor_ratings = sum([
         1 for r in [maint_numeric, reliability_numeric, security_numeric]
-        if r >= 4.0
+        if r <= 2.0
     ])
     if poor_ratings >= 2:
         return {
@@ -169,11 +172,10 @@ def evaluate_quality_gate(data):
             'label': 'REPROVADO',
             'icon': '❌',
             'color': 'failed',
-            'message': 'Projeto não atende aos critérios mínimos de qualidade'
+            'message': 'Projeto não atinge aos critérios mínimos de qualidade'
         }
 
     # ATENÇÃO: Pelo menos uma dimensão com Rating C (3.0) ou debt ratio alto
-    # Rating C está entre D (4.0) e B (2.0), então usamos 2.5 < r < 3.5
     warning_conditions = [
         2.5 < maint_numeric < 3.5,
         2.5 < reliability_numeric < 3.5,
@@ -246,7 +248,19 @@ def main():
     # SEÇÃO DE QUALITY GATE
     # ==========================================
     st.header("🚦 Quality Gate", divider='rainbow')
-    
+
+    # DEBUG: Mostrar dados brutos para diagnóstico
+    with st.expander("🔍 Debug: Dados do Quality Gate"):
+        st.write("**Ratings:**")
+        st.json({
+            'Manutenibilidade': data.get('maintainability', {}).get('rating'),
+            'Confiabilidade': data.get('reliability', {}).get('rating'),
+            'Segurança': data.get('security', {}).get('rating'),
+            'Debt Ratio': data.get('maintainability', {}).get('debtRatio')
+        })
+        st.write("**Código Novo:**")
+        st.json(data.get('newCode', {}))
+
     # Avalia Quality Gate
     qg_result = evaluate_quality_gate(data)
     
