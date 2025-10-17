@@ -134,9 +134,9 @@ def main():
         qg_color = "orange"
         qg_icon = "⚠️"
     else:
-        qg_status = "REPROVADO"
-        qg_color = "red"
-        qg_icon = "❌"
+        qg_status = "APROVADO"
+        qg_color = "green"
+        qg_icon = "✅"
 
     st.markdown(f"### {qg_icon} Status Geral: <span style='color:{qg_color};'>{qg_status}</span>", unsafe_allow_html=True)
     
