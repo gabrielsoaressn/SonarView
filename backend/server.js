@@ -80,11 +80,12 @@ function transformMeasures(data, projectKey) {
     });
   }
 
-  const parseNumeric = (value, isFloat = false) => {
+  const parseNumeric = (value, isFloat = false, defaultValue = '*') => {
     if (value === null || value === undefined || value === '' || isNaN(Number(value))) {
-      return '*';
+      return defaultValue;
     }
-    return isFloat ? parseFloat(value) : parseInt(value, 10);
+    const parsed = isFloat ? parseFloat(value) : parseInt(value, 10);
+    return isFloat ? Math.round(parsed * 100) / 100 : parsed;
   };
 
   return {

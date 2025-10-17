@@ -3,7 +3,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from utils import display_sidebar, get_latest_metrics, render_no_data
+from utils import display_sidebar, get_latest_metrics, render_no_data, is_numeric_value
 
 st.set_page_config(page_title="Visão do Desenvolvedor", page_icon="👩‍💻", layout="wide")
 
@@ -64,22 +64,37 @@ col1, col2 = st.columns(2)
 with col1:
     # Gráfico de Rosca para Cobertura
     st.subheader("Cobertura de Testes")
-    overall_coverage = coverage.get('overall', 0)
-    fig_donut = go.Figure(go.Indicator(
-        mode="gauge+number",
-        value=overall_coverage,
-        title={'text': "Cobertura Geral"},
-        gauge={
-            'axis': {'range': [0, 100]},
-            'bar': {'color': '#10B981'},
-            'steps': [
-                {'range': [0, 50], 'color': '#F87171'},
-                {'range': [50, 80], 'color': '#FBBF24'},
-            ],
-        }
-    ))
-    fig_donut.update_layout(height=400)
-    st.plotly_chart(fig_donut, use_container_width=True)
+    overall_coverage = coverage.get('overall', '*')
+
+    # Verificar se o valor é numérico
+    if not is_numeric_value(overall_coverage):
+        st.info("📊 Dados de cobertura não disponíveis no SonarCloud.\n\nConfigure a análise de cobertura no seu projeto para ver métricas detalhadas.")
+    else:
+        # Converter para número
+        coverage_numeric = float(overall_coverage)
+
+        fig_donut = go.Figure(go.Indicator(
+            mode="gauge+number+delta",
+            value=coverage_numeric,
+            title={'text': "Cobertura Geral (%)"},
+            domain={'x': [0, 1], 'y': [0, 1]},
+            gauge={
+                'axis': {'range': [0, 100]},
+                'bar': {'color': '#10B981'},
+                'steps': [
+                    {'range': [0, 50], 'color': '#F87171'},
+                    {'range': [50, 80], 'color': '#FBBF24'},
+                    {'range': [80, 100], 'color': '#D1FAE5'}
+                ],
+                'threshold': {
+                    'line': {'color': "red", 'width': 4},
+                    'thickness': 0.75,
+                    'value': 80
+                }
+            }
+        ))
+        fig_donut.update_layout(height=400)
+        st.plotly_chart(fig_donut, use_container_width=True)
 
 with col2:
     # Linhas não cobertas (mock)

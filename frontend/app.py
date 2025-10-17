@@ -1,5 +1,5 @@
 import streamlit as st
-from utils import display_sidebar, get_latest_metrics, render_no_data, format_rating, get_rating_color, minutes_to_days
+from utils import display_sidebar, get_latest_metrics, render_no_data, format_rating, get_rating_color, minutes_to_days, format_coverage, is_numeric_value
 
 # ==========================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -105,10 +105,18 @@ def main():
         )
     
     with col4:
+        coverage_value = data.get('coverage', {}).get('overall', '*')
+        new_coverage = data.get('coverage', {}).get('new', '*')
+
+        # Formatar valores de cobertura
+        coverage_display = format_coverage(coverage_value) if is_numeric_value(coverage_value) else '*'
+        delta_display = f"{new_coverage}% em código novo" if is_numeric_value(new_coverage) else None
+
         st.metric(
             label="Cobertura de Testes",
-            value=f"{data.get('coverage', {}).get('overall', 0)}%",
-            delta=f"{data.get('coverage', {}).get('new', 0)}% em código novo"
+            value=coverage_display,
+            delta=delta_display,
+            help="Porcentagem de código coberto por testes automatizados"
         )
     
     st.header("🔍 Foco no Código Novo (Leak Period)", divider='rainbow')

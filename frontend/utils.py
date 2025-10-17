@@ -113,3 +113,22 @@ def minutes_to_days(minutes):
     if days > 0:
         return f"{days}d {hours}h"
     return f"{hours}h"
+
+def format_coverage(coverage_value):
+    """Formata valores de cobertura para exibição."""
+    if coverage_value == '*' or coverage_value is None:
+        return '*'
+    try:
+        return f"{float(coverage_value):.1f}%"
+    except (ValueError, TypeError):
+        return '*'
+
+def is_numeric_value(value):
+    """Verifica se um valor é numérico (não é '*' ou None)."""
+    if value == '*' or value is None:
+        return False
+    try:
+        float(value)
+        return True
+    except (ValueError, TypeError):
+        return False
