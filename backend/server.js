@@ -46,7 +46,7 @@ async function fetchSonarCloudMetrics(projectKey = null) {
     'vulnerabilities', 'security_rating', 'security_remediation_effort',
     'code_smells', 'sqale_index', 'sqale_debt_ratio', 'sqale_rating',
     'ncloc', 'coverage', 'duplicated_lines_density', 'complexity',
-    'new_bugs', 'new_vulnerabilities', 'new_code_smells'
+    'new_bugs', 'new_vulnerabilities', 'new_code_smells', 'new_coverage'
   ].join(',');
 
   try {
