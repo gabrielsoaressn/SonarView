@@ -1,0 +1,87 @@
+name: Track Deployment Metrics
+
+on:
+  # Disparar quando houver push na branch main (após merge)
+  push:
+    branches:
+      - main
+
+  # Permitir disparo manual
+  workflow_dispatch:
+    inputs:
+      status:
+        description: 'Deployment Status (success/failure)'
+        required: true
+        default: 'success'
+        type: choice
+        options:
+          - success
+          - failure
+
+jobs:
+  track-deployment:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Buscar último commit para pegar timestamp
+
+      - name: Get commit information
+        id: commit-info
+        run: |
+          # Pegar informações do commit
+          COMMIT_SHA="${{ github.sha }}"
+          COMMIT_TIMESTAMP=$(git show -s --format=%cI $COMMIT_SHA)
+          DEPLOYMENT_TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          BRANCH="${{ github.ref_name }}"
+
+          echo "commit_sha=$COMMIT_SHA" >> $GITHUB_OUTPUT
+          echo "commit_timestamp=$COMMIT_TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "deployment_timestamp=$DEPLOYMENT_TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "branch=$BRANCH" >> $GITHUB_OUTPUT
+
+          echo "📊 Commit: $COMMIT_SHA"
+          echo "⏰ Commit Time: $COMMIT_TIMESTAMP"
+          echo "🚀 Deploy Time: $DEPLOYMENT_TIMESTAMP"
+
+      - name: Send metrics to backend
+        env:
+          BACKEND_URL: ${{ secrets.BACKEND_API_URL || 'https://recebe-dados-sonarcloud.onrender.com' }}
+          PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY || 'gabrielsoaressn_fklearn' }}
+        run: |
+          # Determinar status do deployment
+          STATUS="${{ github.event.inputs.status || 'success' }}"
+
+          # Enviar dados para o backend
+          curl -X POST "$BACKEND_URL/api/dora/deployment" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "projectKey": "'"$PROJECT_KEY"'",
+              "commitSha": "${{ steps.commit-info.outputs.commit_sha }}",
+              "commitTimestamp": "${{ steps.commit-info.outputs.commit_timestamp }}",
+              "deploymentTimestamp": "${{ steps.commit-info.outputs.deployment_timestamp }}",
+              "environment": "production",
+              "status": "'"$STATUS"'",
+              "branch": "${{ steps.commit-info.outputs.branch }}"
+            }' \
+            -w "\n✅ Status: %{http_code}\n" \
+            -o response.json || echo "⚠️ Failed to send metrics"
+
+          # Mostrar resposta
+          if [ -f response.json ]; then
+            echo "📬 Response:"
+            cat response.json
+            echo ""
+          fi
+
+      - name: Summary
+        run: |
+          echo "## 🎯 Deployment Tracked" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit:** \`${{ steps.commit-info.outputs.commit_sha }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch:** ${{ steps.commit-info.outputs.branch }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status:** ${{ github.event.inputs.status || 'success' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit Time:** ${{ steps.commit-info.outputs.commit_timestamp }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Deploy Time:** ${{ steps.commit-info.outputs.deployment_timestamp }}" >> $GITHUB_STEP_SUMMARY

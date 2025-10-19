@@ -3,7 +3,7 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from utils import display_sidebar, get_latest_metrics, get_metrics_history, render_no_data, minutes_to_days, format_rating
+from utils import display_sidebar, get_latest_metrics, get_metrics_history, get_dora_metrics, render_no_data, minutes_to_days, format_rating, format_lead_time
 
 st.set_page_config(page_title="Visão Executiva", page_icon="👨‍💼", layout="wide")
 
@@ -21,6 +21,7 @@ if not project_id:
 # Carregar dados
 latest_data = get_latest_metrics(project_id)
 history_data = get_metrics_history(project_id)
+dora_data = get_dora_metrics(project_id, days=30)
 
 if not latest_data:
     render_no_data()
@@ -44,16 +45,24 @@ with col2:
         help="Avaliação da manutenibilidade do código (A-E)."
     )
 with col3:
+    lead_time_value = "*"
+    if dora_data and dora_data.get('leadTimeMinutes') is not None:
+        lead_time_value = format_lead_time(dora_data['leadTimeMinutes'])
+
     st.metric(
         label="Lead Time para Mudanças",
-        value="*", # Mocked data
-        help="Tempo médio desde o commit até a produção."
+        value=lead_time_value,
+        help=f"Tempo médio desde o commit até a produção. {'Baseado em ' + str(dora_data.get('totalDeployments', 0)) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
     )
 with col4:
+    cfr_value = "*"
+    if dora_data and dora_data.get('changeFailureRate') is not None:
+        cfr_value = f"{dora_data['changeFailureRate']}%"
+
     st.metric(
         label="Change Failure Rate",
-        value="*", # Mocked data
-        help="Percentual de deploys que causam falhas em produção."
+        value=cfr_value,
+        help=f"Percentual de deploys que causam falhas em produção. {'Baseado em ' + str(dora_data.get('totalDeployments', 0)) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
     )
 
 # --- Quality Gate para Código Novo ---

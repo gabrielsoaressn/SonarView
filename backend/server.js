@@ -26,6 +26,7 @@ const SONARCLOUD_CONFIG = {
 
 // Caminho para arquivo de dados
 const DATA_FILE = path.join(__dirname, 'data', 'metrics.json');
+const DORA_FILE = path.join(__dirname, 'data', 'dora-metrics.json');
 
 // Garantir que a pasta data existe
 async function ensureDataDir() {
@@ -294,6 +295,147 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     service: 'Quality Lens API'
   });
+});
+
+// ==========================================
+// DORA METRICS ENDPOINTS
+// ==========================================
+
+// Função para ler métricas DORA
+async function readDoraMetrics() {
+  try {
+    const data = await fs.readFile(DORA_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
+
+// Função para salvar métricas DORA
+async function saveDoraMetrics(metrics) {
+  try {
+    let existingData = await readDoraMetrics();
+    existingData.push(metrics);
+
+    // Manter apenas os últimos 500 registros
+    if (existingData.length > 500) {
+      existingData = existingData.slice(-500);
+    }
+
+    await fs.writeFile(DORA_FILE, JSON.stringify(existingData, null, 2));
+    console.log('Métricas DORA salvas com sucesso');
+  } catch (error) {
+    console.error('Erro ao salvar métricas DORA:', error);
+    throw error;
+  }
+}
+
+// Registrar deploy (chamado pelo GitHub Actions)
+app.post('/api/dora/deployment', async (req, res) => {
+  try {
+    const {
+      projectKey,
+      commitSha,
+      commitTimestamp,
+      deploymentTimestamp,
+      environment,
+      status,
+      branch
+    } = req.body;
+
+    if (!projectKey || !commitSha || !commitTimestamp || !deploymentTimestamp) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['projectKey', 'commitSha', 'commitTimestamp', 'deploymentTimestamp']
+      });
+    }
+
+    const deployment = {
+      projectKey,
+      commitSha,
+      commitTimestamp: new Date(commitTimestamp).toISOString(),
+      deploymentTimestamp: new Date(deploymentTimestamp).toISOString(),
+      environment: environment || 'production',
+      status: status || 'success',
+      branch: branch || 'main',
+      leadTimeMinutes: Math.round((new Date(deploymentTimestamp) - new Date(commitTimestamp)) / 1000 / 60)
+    };
+
+    await saveDoraMetrics(deployment);
+
+    res.json({
+      message: 'Deployment registered successfully',
+      deployment
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to register deployment',
+      details: error.message
+    });
+  }
+});
+
+// Obter métricas DORA calculadas
+app.get('/api/dora/metrics', async (req, res) => {
+  try {
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const days = parseInt(req.query.days) || 30;
+
+    const allDeployments = await readDoraMetrics();
+    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
+
+    // Filtrar por projeto e período
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const deployments = allDeployments.filter(d =>
+      d.projectKey === sonarProjectKey &&
+      new Date(d.deploymentTimestamp) > cutoffDate
+    );
+
+    if (deployments.length === 0) {
+      return res.json({
+        projectKey: sonarProjectKey,
+        period: `${days} days`,
+        leadTimeMinutes: null,
+        changeFailureRate: null,
+        deploymentFrequency: null,
+        totalDeployments: 0
+      });
+    }
+
+    // Calcular Lead Time (média)
+    const leadTimes = deployments.map(d => d.leadTimeMinutes);
+    const avgLeadTime = Math.round(leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length);
+
+    // Calcular Change Failure Rate
+    const failedDeployments = deployments.filter(d => d.status === 'failure').length;
+    const changeFailureRate = deployments.length > 0
+      ? Math.round((failedDeployments / deployments.length) * 100)
+      : 0;
+
+    // Calcular Deployment Frequency (deploys por dia)
+    const deploymentFrequency = deployments.length / days;
+
+    res.json({
+      projectKey: sonarProjectKey,
+      period: `${days} days`,
+      leadTimeMinutes: avgLeadTime,
+      changeFailureRate: changeFailureRate,
+      deploymentFrequency: Math.round(deploymentFrequency * 100) / 100,
+      totalDeployments: deployments.length,
+      successfulDeployments: deployments.length - failedDeployments,
+      failedDeployments: failedDeployments
+    });
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to fetch DORA metrics',
+      details: error.message
+    });
+  }
 });
 
 // Inicializar servidor

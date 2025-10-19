@@ -44,6 +44,18 @@ def get_metrics_history(project_id, hours=168): # 7 dias
     except requests.exceptions.RequestException:
         return []
 
+@st.cache_data(ttl=300)
+def get_dora_metrics(project_id, days=30):
+    """Busca as métricas DORA de um projeto."""
+    if not project_id:
+        return None
+    try:
+        response = requests.get(f"{API_URL}/dora/metrics", params={'project': project_id, 'days': days})
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException:
+        return None
+
 def format_rating(rating):
     """Formata o rating para exibição (A, B, C, D, E)."""
     rating_map = {1.0: 'A', 2.0: 'B', 3.0: 'C', 4.0: 'D', 5.0: 'E'}
@@ -132,3 +144,17 @@ def is_numeric_value(value):
         return True
     except (ValueError, TypeError):
         return False
+
+def format_lead_time(minutes):
+    """Formata lead time em formato legível."""
+    if minutes is None or minutes < 0:
+        return '*'
+
+    if minutes < 60:
+        return f"{minutes}min"
+    elif minutes < 1440:  # menos de 1 dia
+        hours = minutes / 60
+        return f"{hours:.1f}h"
+    else:
+        days = minutes / 1440
+        return f"{days:.1f}d"
