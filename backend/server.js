@@ -73,10 +73,15 @@ async function fetchSonarCloudMetrics(projectKey = null) {
 // Transformar dados do SonarCloud
 function transformMeasures(data, projectKey) {
   const measures = {};
-  
+
   if (data.component && data.component.measures) {
     data.component.measures.forEach(measure => {
-      measures[measure.metric] = measure.value;
+      // Métricas de código novo vêm dentro de periods
+      if (measure.periods && measure.periods.length > 0) {
+        measures[measure.metric] = measure.periods[0].value;
+      } else {
+        measures[measure.metric] = measure.value;
+      }
     });
   }
 
