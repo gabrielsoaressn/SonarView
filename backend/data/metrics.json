@@ -154,5 +154,551 @@
     },
     "overallRating": "4.0",
     "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T14:17:04.560Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T14:17:05.292Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T14:27:06.074Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T14:27:06.809Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T14:37:06.042Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T14:37:06.563Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T14:47:06.125Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T14:47:06.887Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T14:57:06.041Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T14:57:06.684Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T15:07:06.223Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T15:07:07.011Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
+  },
+  {
+    "timestamp": "2025-10-20T15:17:06.052Z",
+    "projectKey": "gabrielsoaressn_fklearn",
+    "reliability": {
+      "bugs": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 73,
+      "technicalDebt": 563,
+      "debtRatio": 0.5,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": 94.8,
+      "new": 100
+    },
+    "duplication": {
+      "density": 0,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 3713,
+      "complexity": 522
+    },
+    "newCode": {
+      "bugs": 0,
+      "vulnerabilities": 0,
+      "codeSmells": 9
+    },
+    "overallRating": "1.0",
+    "technicalDebtMinutes": 563
+  },
+  {
+    "timestamp": "2025-10-20T15:17:06.507Z",
+    "projectKey": "gabrielsoaressn_commons-lang",
+    "reliability": {
+      "bugs": 55,
+      "rating": "4.0",
+      "remediationEffort": 330
+    },
+    "security": {
+      "vulnerabilities": 0,
+      "rating": "1.0",
+      "remediationEffort": 0
+    },
+    "maintainability": {
+      "codeSmells": 1808,
+      "technicalDebt": 17393,
+      "debtRatio": 1.8,
+      "rating": "1.0"
+    },
+    "coverage": {
+      "overall": "*",
+      "new": "*"
+    },
+    "duplication": {
+      "density": 1.3,
+      "newDensity": "*"
+    },
+    "size": {
+      "linesOfCode": 32705,
+      "complexity": 9118
+    },
+    "newCode": {
+      "bugs": "*",
+      "vulnerabilities": "*",
+      "codeSmells": "*"
+    },
+    "overallRating": "4.0",
+    "technicalDebtMinutes": 17393
   }
 ]

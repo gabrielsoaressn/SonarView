@@ -1,0 +1,22 @@
+[
+  {
+    "projectKey": "gabrielsoaressn_fklearn",
+    "commitSha": "abc123def456",
+    "commitTimestamp": "2025-10-20T10:00:00.000Z",
+    "deploymentTimestamp": "2025-10-20T10:05:00.000Z",
+    "environment": "production",
+    "status": "success",
+    "branch": "main",
+    "leadTimeMinutes": 5
+  },
+  {
+    "projectKey": "gabrielsoaressn_fklearn",
+    "commitSha": "def789ghi012",
+    "commitTimestamp": "2025-10-20T11:00:00.000Z",
+    "deploymentTimestamp": "2025-10-20T11:10:00.000Z",
+    "environment": "production",
+    "status": "failure",
+    "branch": "main",
+    "leadTimeMinutes": 10
+  }
+]
