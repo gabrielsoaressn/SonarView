@@ -1,13 +1,10 @@
 require('dotenv').config();
-// backend/server-postgres.js - Versão com PostgreSQL
+// backend/server.js
 const express = require('express');
 const cors = require('cors');
+const path = require('path');
+const fs = require('fs').promises;
 const axios = require('axios');
-
-// Importar configuração do banco e models
-const { testConnection } = require('./src/config/database');
-const sonarcloudModel = require('./src/models/sonarcloud');
-const doraModel = require('./src/models/dora');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -27,10 +24,21 @@ const SONARCLOUD_CONFIG = {
   defaultProject: 'fklearn'
 };
 
-// ==========================================
-// FUNÇÕES DE COLETA DO SONARCLOUD
-// ==========================================
+// Caminho para arquivo de dados
+const DATA_FILE = path.join(__dirname, 'data', 'metrics.json');
+const DORA_FILE = path.join(__dirname, 'data', 'dora-metrics.json');
 
+// Garantir que a pasta data existe
+async function ensureDataDir() {
+  const dataDir = path.dirname(DATA_FILE);
+  try {
+    await fs.access(dataDir);
+  } catch {
+    await fs.mkdir(dataDir, { recursive: true });
+  }
+}
+
+// Função para buscar métricas do SonarCloud
 async function fetchSonarCloudMetrics(projectKey = null) {
   const selectedProject = projectKey || SONARCLOUD_CONFIG.defaultProject;
   const sonarProjectKey = SONARCLOUD_CONFIG.projects[selectedProject];
@@ -63,11 +71,13 @@ async function fetchSonarCloudMetrics(projectKey = null) {
   }
 }
 
+// Transformar dados do SonarCloud
 function transformMeasures(data, projectKey) {
   const measures = {};
 
   if (data.component && data.component.measures) {
     data.component.measures.forEach(measure => {
+      // Métricas de código novo vêm dentro de periods
       if (measure.periods && measure.periods.length > 0) {
         measures[measure.metric] = measure.periods[0].value;
       } else {
@@ -140,43 +150,126 @@ function calculateOverallRating(measures) {
   });
 }
 
-async function collectMetrics() {
+// Salvar métricas
+async function saveMetrics(metrics) {
   try {
-    console.log('📊 Coletando métricas do SonarCloud...');
-
-    for (const projectKey of Object.keys(SONARCLOUD_CONFIG.projects)) {
-      try {
-        console.log(`  → Coletando: ${projectKey}`);
-        const metrics = await fetchSonarCloudMetrics(projectKey);
-        await sonarcloudModel.saveMetrics(metrics);
-        console.log(`  ✓ ${projectKey} salvo em ${metrics.timestamp}`);
-      } catch (projectError) {
-        console.error(`  ✗ Erro em ${projectKey}:`, projectError.message);
-      }
+    let existingData = [];
+    
+    try {
+      const data = await fs.readFile(DATA_FILE, 'utf8');
+      existingData = JSON.parse(data);
+    } catch {
+      // Arquivo não existe ainda
     }
+
+    existingData.push(metrics);
+
+    // Manter apenas os últimos 1000 registros
+    if (existingData.length > 1000) {
+      existingData = existingData.slice(-1000);
+    }
+
+    await fs.writeFile(DATA_FILE, JSON.stringify(existingData, null, 2));
+    console.log('Métricas salvas com sucesso');
   } catch (error) {
-    console.error('❌ Erro ao coletar métricas:', error.message);
+    console.error('Erro ao salvar métricas:', error);
+    throw error;
   }
 }
 
-// ==========================================
-// ROTAS DA API
-// ==========================================
-
-// Health check
-app.get('/api/health', async (req, res) => {
+// Ler métricas
+async function readMetrics() {
   try {
-    const dbConnected = await testConnection();
-    res.json({
-      status: 'healthy',
-      timestamp: new Date().toISOString(),
-      service: 'Quality Lens API',
-      database: dbConnected ? 'connected' : 'disconnected'
-    });
+    const data = await fs.readFile(DATA_FILE, 'utf8');
+    return JSON.parse(data);
   } catch (error) {
-    res.status(500).json({
-      status: 'unhealthy',
-      error: error.message
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
+
+// Coletar métricas
+async function collectMetrics() {
+  try {
+    console.log('Coletando métricas do SonarCloud...');
+    
+    // Coletar métricas de todos os projetos configurados
+    for (const projectKey of Object.keys(SONARCLOUD_CONFIG.projects)) {
+      try {
+        console.log(`Coletando métricas do projeto: ${projectKey}`);
+        const metrics = await fetchSonarCloudMetrics(projectKey);
+        await saveMetrics(metrics);
+        console.log(`Métricas coletadas do ${projectKey} em ${metrics.timestamp}`);
+      } catch (projectError) {
+        console.error(`Erro ao coletar métricas do projeto ${projectKey}:`, projectError.message);
+      }
+    }
+  } catch (error) {
+    console.error('Erro ao coletar métricas:', error.message);
+  }
+}
+
+// ROTAS DA API
+
+// Métricas mais recentes
+app.get('/api/metrics/latest', async (req, res) => {
+  try {
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const metrics = await readMetrics();
+    const projectMetrics = metrics.filter(m => m.projectKey === SONARCLOUD_CONFIG.projects[projectKey]);
+    const latest = projectMetrics.length > 0 ? projectMetrics[projectMetrics.length - 1] : null;
+    
+    if (!latest) {
+      return res.status(404).json({
+        error: 'No metrics data available',
+        message: 'Please wait for the first data collection cycle to complete'
+      });
+    }
+
+    res.json(latest);
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch latest metrics', 
+      details: error.message 
+    });
+  }
+});
+
+// Histórico de métricas
+app.get('/api/metrics/history', async (req, res) => {
+  try {
+    const hours = parseInt(req.query.hours) || 24;
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const metrics = await readMetrics();
+    const projectMetrics = metrics.filter(m => m.projectKey === SONARCLOUD_CONFIG.projects[projectKey]);
+    
+    const cutoffTime = new Date();
+    cutoffTime.setHours(cutoffTime.getHours() - hours);
+    
+    const filteredMetrics = projectMetrics.filter(metric => 
+      new Date(metric.timestamp) > cutoffTime
+    );
+
+    res.json(filteredMetrics);
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to fetch metrics history', 
+      details: error.message 
+    });
+  }
+});
+
+// Forçar coleta
+app.post('/api/metrics/collect', async (req, res) => {
+  try {
+    await collectMetrics();
+    res.json({ message: 'Metrics collection triggered successfully' });
+  } catch (error) {
+    res.status(500).json({ 
+      error: 'Failed to trigger metrics collection', 
+      details: error.message 
     });
   }
 });
@@ -188,74 +281,57 @@ app.get('/api/projects', (req, res) => {
     name: key.charAt(0).toUpperCase() + key.slice(1).replace('-', ' '),
     sonarKey: SONARCLOUD_CONFIG.projects[key]
   }));
-
+  
   res.json({
     projects,
     default: SONARCLOUD_CONFIG.defaultProject
   });
 });
 
+// Health check
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'healthy',
+    timestamp: new Date().toISOString(),
+    service: 'Quality Lens API'
+  });
+});
+
 // ==========================================
-// ROTAS - MÉTRICAS SONARCLOUD
+// DORA METRICS ENDPOINTS
 // ==========================================
 
-// Métricas mais recentes
-app.get('/api/metrics/latest', async (req, res) => {
+// Função para ler métricas DORA
+async function readDoraMetrics() {
   try {
-    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
-    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
+    const data = await fs.readFile(DORA_FILE, 'utf8');
+    return JSON.parse(data);
+  } catch (error) {
+    if (error.code === 'ENOENT') {
+      return [];
+    }
+    throw error;
+  }
+}
 
-    const latest = await sonarcloudModel.getLatestMetrics(sonarProjectKey);
+// Função para salvar métricas DORA
+async function saveDoraMetrics(metrics) {
+  try {
+    let existingData = await readDoraMetrics();
+    existingData.push(metrics);
 
-    if (!latest) {
-      return res.status(404).json({
-        error: 'No metrics data available',
-        message: 'Please wait for the first data collection cycle to complete'
-      });
+    // Manter apenas os últimos 500 registros
+    if (existingData.length > 500) {
+      existingData = existingData.slice(-500);
     }
 
-    res.json(latest);
+    await fs.writeFile(DORA_FILE, JSON.stringify(existingData, null, 2));
+    console.log('Métricas DORA salvas com sucesso');
   } catch (error) {
-    res.status(500).json({
-      error: 'Failed to fetch latest metrics',
-      details: error.message
-    });
+    console.error('Erro ao salvar métricas DORA:', error);
+    throw error;
   }
-});
-
-// Histórico de métricas
-app.get('/api/metrics/history', async (req, res) => {
-  try {
-    const hours = parseInt(req.query.hours) || 168; // 7 dias por padrão
-    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
-    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
-
-    const history = await sonarcloudModel.getMetricsHistory(sonarProjectKey, hours);
-    res.json(history);
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to fetch metrics history',
-      details: error.message
-    });
-  }
-});
-
-// Forçar coleta
-app.post('/api/metrics/collect', async (req, res) => {
-  try {
-    await collectMetrics();
-    res.json({ message: 'Metrics collection triggered successfully' });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to trigger metrics collection',
-      details: error.message
-    });
-  }
-});
-
-// ==========================================
-// ROTAS - MÉTRICAS DORA
-// ==========================================
+}
 
 // Registrar deploy (chamado pelo GitHub Actions)
 app.post('/api/dora/deployment', async (req, res) => {
@@ -267,11 +343,9 @@ app.post('/api/dora/deployment', async (req, res) => {
       deploymentTimestamp,
       environment,
       status,
-      branch,
-      metadata
+      branch
     } = req.body;
 
-    // Validação
     if (!projectKey || !commitSha || !commitTimestamp || !deploymentTimestamp) {
       return res.status(400).json({
         error: 'Missing required fields',
@@ -279,23 +353,24 @@ app.post('/api/dora/deployment', async (req, res) => {
       });
     }
 
-    const deployment = await doraModel.saveDeployment({
+    const deployment = {
       projectKey,
       commitSha,
-      commitTimestamp,
-      deploymentTimestamp,
-      environment,
-      status,
-      branch,
-      metadata
-    });
+      commitTimestamp: new Date(commitTimestamp).toISOString(),
+      deploymentTimestamp: new Date(deploymentTimestamp).toISOString(),
+      environment: environment || 'production',
+      status: status || 'success',
+      branch: branch || 'main',
+      leadTimeMinutes: Math.round((new Date(deploymentTimestamp) - new Date(commitTimestamp)) / 1000 / 60)
+    };
+
+    await saveDoraMetrics(deployment);
 
     res.json({
       message: 'Deployment registered successfully',
       deployment
     });
   } catch (error) {
-    console.error('❌ Erro ao registrar deployment:', error);
     res.status(500).json({
       error: 'Failed to register deployment',
       details: error.message
@@ -308,12 +383,54 @@ app.get('/api/dora/metrics', async (req, res) => {
   try {
     const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
     const days = parseInt(req.query.days) || 30;
+
+    const allDeployments = await readDoraMetrics();
     const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
 
-    const metrics = await doraModel.calculateDoraMetrics(sonarProjectKey, days);
-    res.json(metrics);
+    // Filtrar por projeto e período
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    const deployments = allDeployments.filter(d =>
+      d.projectKey === sonarProjectKey &&
+      new Date(d.deploymentTimestamp) > cutoffDate
+    );
+
+    if (deployments.length === 0) {
+      return res.json({
+        projectKey: sonarProjectKey,
+        period: `${days} days`,
+        leadTimeMinutes: null,
+        changeFailureRate: null,
+        deploymentFrequency: null,
+        totalDeployments: 0
+      });
+    }
+
+    // Calcular Lead Time (média)
+    const leadTimes = deployments.map(d => d.leadTimeMinutes);
+    const avgLeadTime = Math.round(leadTimes.reduce((a, b) => a + b, 0) / leadTimes.length);
+
+    // Calcular Change Failure Rate
+    const failedDeployments = deployments.filter(d => d.status === 'failure').length;
+    const changeFailureRate = deployments.length > 0
+      ? Math.round((failedDeployments / deployments.length) * 100)
+      : 0;
+
+    // Calcular Deployment Frequency (deploys por dia)
+    const deploymentFrequency = deployments.length / days;
+
+    res.json({
+      projectKey: sonarProjectKey,
+      period: `${days} days`,
+      leadTimeMinutes: avgLeadTime,
+      changeFailureRate: changeFailureRate,
+      deploymentFrequency: Math.round(deploymentFrequency * 100) / 100,
+      totalDeployments: deployments.length,
+      successfulDeployments: deployments.length - failedDeployments,
+      failedDeployments: failedDeployments
+    });
   } catch (error) {
-    console.error('❌ Erro ao calcular métricas DORA:', error);
     res.status(500).json({
       error: 'Failed to fetch DORA metrics',
       details: error.message
@@ -321,75 +438,18 @@ app.get('/api/dora/metrics', async (req, res) => {
   }
 });
 
-// Obter lista de deployments
-app.get('/api/dora/deployments', async (req, res) => {
-  try {
-    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
-    const days = parseInt(req.query.days) || 30;
-    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
-
-    const deployments = await doraModel.getDeployments(sonarProjectKey, days);
-    res.json({
-      projectKey: sonarProjectKey,
-      period: `${days} days`,
-      count: deployments.length,
-      deployments
-    });
-  } catch (error) {
-    res.status(500).json({
-      error: 'Failed to fetch deployments',
-      details: error.message
-    });
-  }
-});
-
-// ==========================================
-// INICIALIZAR SERVIDOR
-// ==========================================
-
+// Inicializar servidor
 async function startServer() {
-  console.log('🚀 Iniciando Quality Lens Backend...\n');
-
-  // Testar conexão com o banco
-  console.log('📡 Testando conexão com PostgreSQL...');
-  const dbConnected = await testConnection();
-
-  if (!dbConnected) {
-    console.error('❌ ERRO: Não foi possível conectar ao PostgreSQL');
-    console.error('Verifique se DATABASE_URL está configurada corretamente');
-    process.exit(1);
-  }
-
-  // Coletar métricas iniciais
-  console.log('\n📊 Coletando métricas iniciais...');
+  await ensureDataDir();
   await collectMetrics();
-
-  // Configurar coleta automática a cada 10 minutos
+  
+  // Coletar métricas a cada 10 minutos
   setInterval(collectMetrics, 10 * 60 * 1000);
-  console.log('⏰ Coleta automática ativada (a cada 10 minutos)\n');
-
-  // Iniciar servidor
+  
   app.listen(PORT, () => {
-    console.log(`✨ Quality Lens Backend rodando em http://localhost:${PORT}`);
-    console.log(`🗄️  Usando PostgreSQL para persistência`);
-    console.log(`📊 API pronta para receber requisições\n`);
+    console.log(`🚀 Quality Lens Backend rodando em http://localhost:${PORT}`);
+    console.log('📊 Coleta de métricas automática ativada (a cada 10 minutos)');
   });
 }
 
-// Tratamento de erros não capturados
-process.on('unhandledRejection', (err) => {
-  console.error('❌ Unhandled Rejection:', err);
-});
-
-process.on('SIGTERM', async () => {
-  console.log('\n👋 Encerrando servidor...');
-  const { closePool } = require('./src/config/database');
-  await closePool();
-  process.exit(0);
-});
-
-// Iniciar
-startServer().catch(err => {
-  console.error('❌ Erro fatal ao iniciar servidor:', err);
-  process.exit(1);
-});
+startServer().catch(console.error);
