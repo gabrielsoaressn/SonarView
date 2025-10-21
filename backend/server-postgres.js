@@ -8,6 +8,7 @@ const axios = require('axios');
 const { testConnection } = require('./src/config/database');
 const sonarcloudModel = require('./src/models/sonarcloud');
 const doraModel = require('./src/models/dora');
+const sonarcloudDetails = require('./src/services/sonarcloud-details');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -338,6 +339,94 @@ app.get('/api/dora/deployments', async (req, res) => {
   } catch (error) {
     res.status(500).json({
       error: 'Failed to fetch deployments',
+      details: error.message
+    });
+  }
+});
+
+// ==========================================
+// ROTAS - DETALHES DO SONARCLOUD
+// ==========================================
+
+// Buscar issues em código novo (para tabela de problemas)
+app.get('/api/sonarcloud/new-code-issues', async (req, res) => {
+  try {
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
+
+    const issues = await sonarcloudDetails.getNewCodeIssues(
+      sonarProjectKey,
+      SONARCLOUD_CONFIG.token
+    );
+
+    res.json(issues);
+  } catch (error) {
+    console.error('❌ Erro ao buscar issues:', error);
+    res.status(500).json({
+      error: 'Failed to fetch new code issues',
+      details: error.message
+    });
+  }
+});
+
+// Buscar complexidade por componente (para gráfico sunburst)
+app.get('/api/sonarcloud/complexity', async (req, res) => {
+  try {
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
+
+    const complexity = await sonarcloudDetails.getComplexityByComponent(
+      sonarProjectKey,
+      SONARCLOUD_CONFIG.token
+    );
+
+    res.json(complexity);
+  } catch (error) {
+    console.error('❌ Erro ao buscar complexidade:', error);
+    res.status(500).json({
+      error: 'Failed to fetch complexity data',
+      details: error.message
+    });
+  }
+});
+
+// Buscar cobertura por componente
+app.get('/api/sonarcloud/coverage-by-file', async (req, res) => {
+  try {
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
+
+    const coverage = await sonarcloudDetails.getCoverageByComponent(
+      sonarProjectKey,
+      SONARCLOUD_CONFIG.token
+    );
+
+    res.json(coverage);
+  } catch (error) {
+    console.error('❌ Erro ao buscar cobertura:', error);
+    res.status(500).json({
+      error: 'Failed to fetch coverage data',
+      details: error.message
+    });
+  }
+});
+
+// Buscar security hotspots
+app.get('/api/sonarcloud/security-hotspots', async (req, res) => {
+  try {
+    const projectKey = req.query.project || SONARCLOUD_CONFIG.defaultProject;
+    const sonarProjectKey = SONARCLOUD_CONFIG.projects[projectKey];
+
+    const hotspots = await sonarcloudDetails.getSecurityHotspots(
+      sonarProjectKey,
+      SONARCLOUD_CONFIG.token
+    );
+
+    res.json(hotspots);
+  } catch (error) {
+    console.error('❌ Erro ao buscar security hotspots:', error);
+    res.status(500).json({
+      error: 'Failed to fetch security hotspots',
       details: error.message
     });
   }
