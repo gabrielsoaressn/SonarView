@@ -79,17 +79,28 @@ def display_sidebar():
     project_id = None
     if projects_data and projects_data.get('projects'):
         project_names = {p['id']: p['name'] for p in projects_data['projects']}
-        
+
         # Tenta manter o projeto selecionado através da session_state
         if 'selected_project_id' not in st.session_state:
             st.session_state.selected_project_id = projects_data.get('default')
 
+        # Encontrar o índice do projeto atualmente selecionado
+        project_keys = list(project_names.keys())
+        current_index = 0
+        if st.session_state.selected_project_id in project_keys:
+            current_index = project_keys.index(st.session_state.selected_project_id)
+
         selected_project_id = st.sidebar.selectbox(
             "Selecione o Projeto",
-            options=list(project_names.keys()),
+            options=project_keys,
             format_func=lambda x: project_names[x],
-            key='selected_project_id'
+            index=current_index
         )
+
+        # Atualizar o session_state apenas se o usuário mudou o projeto
+        if selected_project_id != st.session_state.selected_project_id:
+            st.session_state.selected_project_id = selected_project_id
+
         project_id = selected_project_id
         st.sidebar.info(f"Analisando: **{project_names[project_id]}**")
     else:
