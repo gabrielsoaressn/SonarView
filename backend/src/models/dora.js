@@ -73,39 +73,39 @@ const getDeployments = async (projectKey, days = 30) => {
  */
 const calculateDoraMetrics = async (projectKey, days = 30) => {
   const query = `
-    SELECT 
+    SELECT
       COUNT(*) as total_deployments,
       COUNT(*) FILTER (WHERE status = 'success') as successful_deployments,
       COUNT(*) FILTER (WHERE status = 'failure') as failed_deployments,
       ROUND(
         COALESCE(
-          (COUNT(*) FILTER (WHERE status = 'failure')::DECIMAL / NULLIF(COUNT(*), 0) * 100),
+          (COUNT(*) FILTER (WHERE status = 'failure')::NUMERIC / NULLIF(COUNT(*), 0) * 100),
           0
-        ),
+        )::NUMERIC,
         2
       ) as change_failure_rate,
       ROUND(
-        AVG(lead_time_minutes) FILTER (WHERE status = 'success'),
+        COALESCE(AVG(lead_time_minutes) FILTER (WHERE status = 'success'), 0)::NUMERIC,
         2
       ) as avg_lead_time_minutes,
       ROUND(
-        PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY lead_time_minutes) FILTER (WHERE status = 'success'),
+        COALESCE(PERCENTILE_CONT(0.5) WITHIN GROUP (ORDER BY lead_time_minutes) FILTER (WHERE status = 'success'), 0)::NUMERIC,
         2
       ) as median_lead_time_minutes,
       MIN(deployment_timestamp) as first_deployment,
       MAX(deployment_timestamp) as last_deployment,
-      
+
       -- Deployment Frequency (deployments por dia)
       ROUND(
-        COUNT(*)::DECIMAL / NULLIF($2, 0),
+        (COUNT(*)::NUMERIC / NULLIF($2, 0))::NUMERIC,
         2
       ) as deployment_frequency_per_day,
-      
+
       -- MTTR (Mean Time to Restore) - tempo médio entre falha e próximo sucesso
       (
-        SELECT ROUND(AVG(time_to_restore), 2)
+        SELECT ROUND(COALESCE(AVG(time_to_restore), 0)::NUMERIC, 2)
         FROM (
-          SELECT 
+          SELECT
             EXTRACT(EPOCH FROM (
               LEAD(deployment_timestamp) OVER (ORDER BY deployment_timestamp) - deployment_timestamp
             )) / 60 as time_to_restore
@@ -116,7 +116,7 @@ const calculateDoraMetrics = async (projectKey, days = 30) => {
         ) failures
         WHERE time_to_restore IS NOT NULL
       ) as mean_time_to_restore_minutes
-      
+
     FROM dora_deployments
     WHERE project_key = $1
       AND deployment_timestamp >= NOW() - INTERVAL '1 day' * $2

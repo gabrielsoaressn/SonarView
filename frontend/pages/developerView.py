@@ -137,7 +137,14 @@ if complexity_data and complexity_data.get('stats'):
             color='complexity',
             color_continuous_scale='Reds'
         )
-        fig.update_layout(height=400, showlegend=False)
+        fig.update_layout(
+            height=400,
+            showlegend=False,
+            font=dict(size=14),
+            title_font_size=18,
+            xaxis=dict(title_font_size=16),
+            yaxis=dict(title_font_size=16, tickfont=dict(size=13))
+        )
         st.plotly_chart(fig, use_container_width=True)
 
         # Tabela detalhada
@@ -221,7 +228,13 @@ with col2:
                 color='coverage',
                 color_continuous_scale='RdYlGn'
             )
-            fig.update_layout(height=400)
+            fig.update_layout(
+                height=400,
+                font=dict(size=14),
+                title_font_size=18,
+                xaxis=dict(title_font_size=16),
+                yaxis=dict(title_font_size=16, tickfont=dict(size=13))
+            )
             st.plotly_chart(fig, use_container_width=True)
 
             # Tabela

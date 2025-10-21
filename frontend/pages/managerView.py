@@ -46,23 +46,34 @@ with col2:
     )
 with col3:
     lead_time_value = "*"
-    if dora_data and dora_data.get('leadTimeMinutes') is not None:
-        lead_time_value = format_lead_time(dora_data['leadTimeMinutes'])
+    total_deploys = 0
+    if dora_data:
+        # Handle new nested structure from API
+        lead_time_data = dora_data.get('leadTime', {})
+        if lead_time_data.get('average') is not None:
+            lead_time_value = format_lead_time(lead_time_data['average'])
+
+        # Get total deployments from deployment frequency
+        deploy_freq = dora_data.get('deploymentFrequency', {})
+        total_deploys = deploy_freq.get('total', 0)
 
     st.metric(
         label="Lead Time para Mudanças",
         value=lead_time_value,
-        help=f"Tempo médio desde o commit até a produção. {'Baseado em ' + str(dora_data.get('totalDeployments', 0)) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
+        help=f"Tempo médio desde o commit até a produção. {'Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
     )
 with col4:
     cfr_value = "*"
-    if dora_data and dora_data.get('changeFailureRate') is not None:
-        cfr_value = f"{dora_data['changeFailureRate']}%"
+    if dora_data:
+        # Handle new nested structure from API
+        cfr_data = dora_data.get('changeFailureRate', {})
+        if cfr_data.get('rate') is not None:
+            cfr_value = f"{cfr_data['rate']}%"
 
     st.metric(
         label="Change Failure Rate",
         value=cfr_value,
-        help=f"Percentual de deploys que causam falhas em produção. {'Baseado em ' + str(dora_data.get('totalDeployments', 0)) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
+        help=f"Percentual de deploys que causam falhas em produção. {'Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
     )
 
 # --- Quality Gate para Código Novo ---
@@ -90,9 +101,15 @@ with col1:
         labels=['Esforço Produtivo', 'Pagamento de Dívida'],
         values=[esforco_produtivo, debt_ratio],
         hole=.4,
-        marker_colors=['#2575FC', '#FFB000']
+        marker_colors=['#2575FC', '#FFB000'],
+        textfont=dict(size=16)
     )])
-    fig_pie.update_layout(legend_title_text='Tipo de Esforço', height=400)
+    fig_pie.update_layout(
+        legend_title_text='Tipo de Esforço',
+        height=400,
+        font=dict(size=14),
+        legend=dict(font=dict(size=14))
+    )
     st.plotly_chart(fig_pie, use_container_width=True)
 
 with col2:
@@ -111,7 +128,13 @@ with col2:
             labels={'timestamp': 'Data', 'technicalDebtHours': 'Dívida (horas)'},
             markers=True
         )
-        fig_line.update_layout(height=400)
+        fig_line.update_layout(
+            height=400,
+            font=dict(size=14),
+            title_font_size=18,
+            xaxis=dict(title_font_size=16, tickfont=dict(size=13)),
+            yaxis=dict(title_font_size=16, tickfont=dict(size=13))
+        )
         st.plotly_chart(fig_line, use_container_width=True)
     else:
         st.info("Dados históricos insuficientes para gerar o gráfico de tendência.")

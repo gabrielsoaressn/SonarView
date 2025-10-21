@@ -76,8 +76,8 @@ def main():
     # Seção de Quality Gate
     st.header("🚦 Quality Gate", divider='rainbow')
     
-    qg_status = "Aprovado" if data.get('overallRating') == 'A' else "Aprovado"
-    qg_color = "green" if qg_status == "Aprovado" else "green"
+    qg_status = "Aprovado" if data.get('overallRating') == 'A' else "Reprovado"
+    qg_color = "green" if qg_status == "Aprovado" else "red"
     
     st.markdown(f"### Status Geral: <span style='color:{qg_color};'>{qg_status}</span>", unsafe_allow_html=True)
     
