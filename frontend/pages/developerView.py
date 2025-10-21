@@ -3,8 +3,13 @@ import streamlit as st
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from utils import display_sidebar, get_latest_metrics, render_no_data, is_numeric_value
-
+from utils import (
+    display_sidebar, get_latest_metrics, render_no_data,
+    is_numeric_value,
+    get_new_code_issues,
+    get_complexity_data,
+    get_coverage_by_file
+)
 st.set_page_config(page_title="Visão do Desenvolvedor", page_icon="👩‍💻", layout="wide")
 
 # Título e descrição
@@ -37,9 +42,55 @@ with col2:
 with col3:
     st.metric("Novos Code Smells", new_code.get('codeSmells', '*'), delta_color="inverse")
 
-# Tabela de Problemas (mock)
+# Tabela de Problemas em Código Novo
 st.subheader("Tabela de Problemas em Código Novo")
-st.info("*")
+
+issues_data = get_new_code_issues(project_id)
+
+if issues_data and issues_data.get('total', 0) > 0:
+    issues = issues_data['issues']
+
+    # Criar abas para cada tipo
+    tab1, tab2, tab3 = st.tabs([
+        f"🐛 Bugs ({len(issues['bugs'])})",
+        f"🔐 Vulnerabilidades ({len(issues['vulnerabilities'])})",
+        f"💡 Code Smells ({len(issues['codeSmells'])})"
+    ])
+
+    with tab1:
+        if issues['bugs']:
+            df_bugs = pd.DataFrame(issues['bugs'])
+            st.dataframe(
+                df_bugs[['severity', 'component', 'message', 'line', 'effort']],
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.success("✅ Nenhum bug em código novo!")
+
+    with tab2:
+        if issues['vulnerabilities']:
+            df_vuln = pd.DataFrame(issues['vulnerabilities'])
+            st.dataframe(
+                df_vuln[['severity', 'component', 'message', 'line', 'effort']],
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.success("✅ Nenhuma vulnerabilidade em código novo!")
+
+    with tab3:
+        if issues['codeSmells']:
+            df_smells = pd.DataFrame(issues['codeSmells'])
+            st.dataframe(
+                df_smells[['severity', 'component', 'message', 'line', 'effort']],
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.success("✅ Nenhum code smell em código novo!")
+else:
+    st.success("✅ Nenhum problema encontrado em código novo!")
 
 # --- Hotspots de Código ---
 st.header("Hotspots de Código para Refatoração", divider='orange')
@@ -52,9 +103,53 @@ with col1:
 with col2:
     st.metric("Densidade de Duplicação", f"{duplication.get('density', 0)}%")
 
-# Sunburst de Complexidade (mock)
+# Complexidade por Módulo/Classe
 st.subheader("Complexidade por Módulo/Classe")
-st.info("*")
+
+complexity_data = get_complexity_data(project_id)
+
+if complexity_data and complexity_data.get('stats'):
+    stats = complexity_data['stats']
+    hotspots = stats['hotspots'][:10]  # Top 10 mais complexos
+
+    # Métricas resumidas
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.metric("Total de Arquivos", stats['totalComponents'])
+    with col2:
+        st.metric("Complexidade Média", stats['avgComplexity'])
+    with col3:
+        st.metric("Complexidade Máxima", stats['maxComplexity'])
+
+    # Tabela dos top 10 mais complexos
+    if hotspots:
+        st.subheader("🔥 Top 10 Arquivos Mais Complexos")
+        df_complexity = pd.DataFrame(hotspots)
+
+        # Criar gráfico de barras
+        fig = px.bar(
+            df_complexity,
+            x='complexity',
+            y='name',
+            orientation='h',
+            title='Complexidade por Arquivo',
+            labels={'complexity': 'Complexidade Ciclomática', 'name': 'Arquivo'},
+            color='complexity',
+            color_continuous_scale='Reds'
+        )
+        fig.update_layout(height=400, showlegend=False)
+        st.plotly_chart(fig, use_container_width=True)
+
+        # Tabela detalhada
+        st.dataframe(
+            df_complexity[['name', 'complexity', 'cognitiveComplexity', 'linesOfCode']],
+            use_container_width=True,
+            hide_index=True
+        )
+    else:
+        st.info("Nenhum dado de complexidade disponível")
+else:
+    st.info("Dados de complexidade não disponíveis")
 
 # --- Qualidade dos Testes ---
 st.header("Qualidade e Cobertura de Testes", divider='orange')
@@ -97,7 +192,45 @@ with col1:
         st.plotly_chart(fig_donut, use_container_width=True)
 
 with col2:
-    # Linhas não cobertas (mock)
+    # Linhas Não Cobertas por Testes
     st.subheader("Linhas Não Cobertas por Testes")
-    st.metric("Linhas a cobrir", "*", help="Número total de linhas de código que não estão cobertas por testes.")
-    st.info("*")
+
+    coverage_data = get_coverage_by_file(project_id)
+
+    if coverage_data and coverage_data.get('worstCoverage'):
+        worst = coverage_data['worstCoverage'][:10]  # Top 10 com pior cobertura
+
+        if worst:
+            df_coverage = pd.DataFrame(worst)
+            total_uncovered = df_coverage['uncoveredLines'].sum()
+
+            st.metric(
+                "Total de Linhas Não Cobertas",
+                f"{int(total_uncovered):,}",
+                help="Número total de linhas sem cobertura de testes"
+            )
+
+            # Gráfico de barras
+            fig = px.bar(
+                df_coverage,
+                x='uncoveredLines',
+                y='name',
+                orientation='h',
+                title='Top 10 Arquivos com Mais Linhas Não Cobertas',
+                labels={'uncoveredLines': 'Linhas Não Cobertas', 'name': 'Arquivo'},
+                color='coverage',
+                color_continuous_scale='RdYlGn'
+            )
+            fig.update_layout(height=400)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Tabela
+            st.dataframe(
+                df_coverage[['name', 'coverage', 'uncoveredLines', 'linesToCover']],
+                use_container_width=True,
+                hide_index=True
+            )
+        else:
+            st.success("✅ Cobertura de testes excelente!")
+    else:
+        st.info("📊 Dados de cobertura não disponíveis no SonarCloud.\n\nConfigure a análise de cobertura no seu projeto.")

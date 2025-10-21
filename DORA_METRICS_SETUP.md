@@ -82,7 +82,7 @@ Para registrar que um deploy falhou:
 Após alguns deploys serem registrados:
 
 1. Acesse o frontend do Quality Lens
-2. Vá em **Visão Executiva** (👨‍💼)
+2. Vá em **Visão Gerencial** (👨‍💼)
 3. As métricas DORA aparecerão nos KPIs Principais:
    - **Lead Time para Mudanças**: Tempo médio (em minutos/horas/dias)
    - **Change Failure Rate**: Percentual de falhas (0-100%)

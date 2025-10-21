@@ -5,11 +5,11 @@ import plotly.graph_objects as go
 import pandas as pd
 from utils import display_sidebar, get_latest_metrics, get_metrics_history, get_dora_metrics, render_no_data, minutes_to_days, format_rating, format_lead_time
 
-st.set_page_config(page_title="Visão Executiva", page_icon="👨‍💼", layout="wide")
+st.set_page_config(page_title="Visão Gerencial", page_icon="👨‍💼", layout="wide")
 
 # Título e descrição
-st.title("👨‍💼 Visão Executiva")
-st.markdown("Métricas de alto nível para tomada de decisão estratégica e monitoramento da saúde do projeto.")
+st.title("👨‍💼 Visão Gerencial")
+st.markdown("Métricas e KPIs para gestores acompanharem a saúde do projeto e tomarem decisões estratégicas.")
 
 # Sidebar e seleção de projeto
 project_id = display_sidebar()

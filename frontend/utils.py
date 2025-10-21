@@ -98,7 +98,7 @@ def display_sidebar():
     st.sidebar.markdown("---")
     st.sidebar.header("Navegação")
     st.sidebar.page_link("app.py", label="Visão Geral", icon="🏠")
-    st.sidebar.page_link("pages/managerView.py", label="Visão Executiva", icon="👨‍💼")
+    st.sidebar.page_link("pages/managerView.py", label="Visão Gerencial", icon="👨‍💼")
     st.sidebar.page_link("pages/developerView.py", label="Visão do Desenvolvedor", icon="👩‍💻")
     
     st.sidebar.markdown("---")
@@ -158,3 +158,47 @@ def format_lead_time(minutes):
     else:
         days = minutes / 1440
         return f"{days:.1f}d"
+@st.cache_data(ttl=300)
+def get_new_code_issues(project_id):
+    """Busca issues (bugs, vulnerabilities, code smells) em código novo."""
+    if not project_id:
+        return None
+    try:
+        response = requests.get(
+            f"{API_URL}/sonarcloud/new-code-issues",
+            params={'project': project_id}
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException:
+        return None
+
+@st.cache_data(ttl=300)
+def get_complexity_data(project_id):
+    """Busca complexidade por componente (arquivo)."""
+    if not project_id:
+        return None
+    try:
+        response = requests.get(
+            f"{API_URL}/sonarcloud/complexity",
+            params={'project': project_id}
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException:
+        return None
+
+@st.cache_data(ttl=300)
+def get_coverage_by_file(project_id):
+    """Busca cobertura de testes por arquivo."""
+    if not project_id:
+        return None
+    try:
+        response = requests.get(
+            f"{API_URL}/sonarcloud/coverage-by-file",
+            params={'project': project_id}
+        )
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.RequestException:
+        return None
