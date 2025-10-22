@@ -213,3 +213,85 @@ def get_coverage_by_file(project_id):
         return response.json()
     except requests.exceptions.RequestException:
         return None
+
+def rating_to_score(rating):
+    """Converte rating (A-E ou 1-5) para escala 0-100."""
+    # Mapear rating para score (A=100, B=75, C=50, D=25, E=0)
+    rating_map = {
+        'A': 100, 'B': 75, 'C': 50, 'D': 25, 'E': 0,
+        '1': 100, '1.0': 100,
+        '2': 75, '2.0': 75,
+        '3': 50, '3.0': 50,
+        '4': 25, '4.0': 25,
+        '5': 0, '5.0': 0
+    }
+
+    if rating is None or rating == '*':
+        return 50  # Valor neutro se não houver dados
+
+    # Converter para string para buscar no mapa
+    rating_str = str(rating)
+
+    # Tentar converter rating numérico para letra
+    try:
+        rating_float = float(rating)
+        if rating_float == 1.0:
+            return 100
+        elif rating_float == 2.0:
+            return 75
+        elif rating_float == 3.0:
+            return 50
+        elif rating_float == 4.0:
+            return 25
+        elif rating_float == 5.0:
+            return 0
+    except (ValueError, TypeError):
+        pass
+
+    return rating_map.get(rating_str, 50)
+
+def prepare_radar_data(metrics_data):
+    """Prepara dados para o gráfico de radar com 5 dimensões."""
+    if not metrics_data:
+        return None
+
+    # 1. Reliability (baseado em bugs e rating)
+    reliability_rating = metrics_data.get('reliability', {}).get('rating', '*')
+    reliability_score = rating_to_score(reliability_rating)
+
+    # 2. Security (baseado em vulnerabilidades e rating)
+    security_rating = metrics_data.get('security', {}).get('rating', '*')
+    security_score = rating_to_score(security_rating)
+
+    # 3. Maintainability (baseado em code smells e rating)
+    maintainability_rating = metrics_data.get('maintainability', {}).get('rating', '*')
+    maintainability_score = rating_to_score(maintainability_rating)
+
+    # 4. Test Coverage (já está em porcentagem)
+    coverage_value = metrics_data.get('coverage', {}).get('overall', '*')
+    if is_numeric_value(coverage_value):
+        coverage_score = float(coverage_value)
+    else:
+        coverage_score = 0
+
+    # 5. Code Quality (inverso da complexidade normalizada)
+    # Vamos usar densidade de duplicação invertida como proxy de qualidade
+    duplication = metrics_data.get('duplication', {}).get('density', 0)
+    if is_numeric_value(duplication):
+        duplication_value = float(duplication)
+        # Inverter: 0% duplicação = 100 score, 100% duplicação = 0 score
+        code_quality_score = max(0, 100 - duplication_value)
+    else:
+        code_quality_score = 50
+
+    return {
+        'dimensions': ['Confiabilidade', 'Segurança', 'Manutenibilidade', 'Cobertura de Testes', 'Qualidade do Código'],
+        'scores': [reliability_score, security_score, maintainability_score, coverage_score, code_quality_score],
+        'ratings': {
+            'reliability': format_rating(reliability_rating),
+            'security': format_rating(security_rating),
+            'maintainability': format_rating(maintainability_rating),
+            'coverage': f"{coverage_score:.1f}%" if coverage_score > 0 else 'N/A',
+            'codeQuality': f"{code_quality_score:.1f}"
+        }
+    }

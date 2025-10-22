@@ -1,5 +1,6 @@
 import streamlit as st
-from utils import display_sidebar, get_latest_metrics, render_no_data, format_rating, get_rating_color, minutes_to_days, format_coverage, is_numeric_value
+import plotly.graph_objects as go
+from utils import display_sidebar, get_latest_metrics, render_no_data, format_rating, get_rating_color, minutes_to_days, format_coverage, is_numeric_value, prepare_radar_data
 
 # ==========================================
 # CONFIGURAÇÃO DA PÁGINA
@@ -118,7 +119,97 @@ def main():
             delta=delta_display,
             help="Porcentagem de código coberto por testes automatizados"
         )
-    
+
+    # Seção de Gráfico de Radar
+    st.header("📊 Dimensões de Qualidade", divider='rainbow')
+
+    radar_data = prepare_radar_data(data)
+
+    if radar_data:
+        col_radar, col_legend = st.columns([2, 1])
+
+        with col_radar:
+            # Criar gráfico de radar
+            fig_radar = go.Figure()
+
+            fig_radar.add_trace(go.Scatterpolar(
+                r=radar_data['scores'],
+                theta=radar_data['dimensions'],
+                fill='toself',
+                name='Score Atual',
+                line=dict(color='#2575FC', width=2),
+                fillcolor='rgba(37, 117, 252, 0.3)'
+            ))
+
+            # Adicionar linha de referência (ideal = 100)
+            fig_radar.add_trace(go.Scatterpolar(
+                r=[100, 100, 100, 100, 100],
+                theta=radar_data['dimensions'],
+                fill='toself',
+                name='Meta Ideal',
+                line=dict(color='#10B981', width=1, dash='dash'),
+                fillcolor='rgba(16, 185, 129, 0.1)'
+            ))
+
+            fig_radar.update_layout(
+                polar=dict(
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100],
+                        tickmode='linear',
+                        tick0=0,
+                        dtick=25,
+                        showticklabels=True,
+                        ticks='outside'
+                    )
+                ),
+                showlegend=True,
+                legend=dict(
+                    orientation="h",
+                    yanchor="bottom",
+                    y=-0.2,
+                    xanchor="center",
+                    x=0.5
+                ),
+                height=500,
+                title=dict(
+                    text="Análise de Qualidade do Software",
+                    font=dict(size=18)
+                )
+            )
+
+            st.plotly_chart(fig_radar, use_container_width=True)
+
+        with col_legend:
+            st.subheader("Detalhes das Dimensões")
+
+            # Confiabilidade
+            st.markdown(f"**🔧 Confiabilidade**")
+            st.markdown(f"Rating: `{radar_data['ratings']['reliability']}` | Score: `{radar_data['scores'][0]:.0f}/100`")
+            st.caption("Baseado em bugs e rating de confiabilidade")
+
+            # Segurança
+            st.markdown(f"**🔒 Segurança**")
+            st.markdown(f"Rating: `{radar_data['ratings']['security']}` | Score: `{radar_data['scores'][1]:.0f}/100`")
+            st.caption("Baseado em vulnerabilidades e rating de segurança")
+
+            # Manutenibilidade
+            st.markdown(f"**🔨 Manutenibilidade**")
+            st.markdown(f"Rating: `{radar_data['ratings']['maintainability']}` | Score: `{radar_data['scores'][2]:.0f}/100`")
+            st.caption("Baseado em code smells e dívida técnica")
+
+            # Cobertura de Testes
+            st.markdown(f"**🧪 Cobertura de Testes**")
+            st.markdown(f"Cobertura: `{radar_data['ratings']['coverage']}` | Score: `{radar_data['scores'][3]:.0f}/100`")
+            st.caption("Porcentagem de código coberto por testes")
+
+            # Qualidade do Código
+            st.markdown(f"**✨ Qualidade do Código**")
+            st.markdown(f"Score: `{radar_data['scores'][4]:.0f}/100`")
+            st.caption("Baseado em duplicação de código (invertido)")
+    else:
+        st.info("Dados insuficientes para gerar o gráfico de radar.")
+
     st.header("🔍 Foco no Código Novo (Leak Period)", divider='rainbow')
     
     new_code = data.get('newCode', {})

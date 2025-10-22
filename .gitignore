@@ -57,3 +57,11 @@ temp/
 
 # Streamlit cache
 .streamlit/
+
+# Academic documents
+relatorio-final-enic/
+artigo/
+
+# Diagrams and documentation
+diagramas-sonarview.html
+*.pdf
