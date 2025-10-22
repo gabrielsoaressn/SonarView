@@ -65,3 +65,9 @@ artigo/
 # Diagrams and documentation
 diagramas-sonarview.html
 *.pdf
+
+# Installation scripts
+scripts/
+
+# Local credentials (NEVER COMMIT!)
+CREDENTIALS.md
