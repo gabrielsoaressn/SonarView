@@ -6,6 +6,7 @@ const axios = require('axios');
 
 // Importar configuração do banco e models
 const { testConnection } = require('./src/config/database');
+const { ensureDatabaseFunctions } = require('./src/config/ensure-functions');
 const sonarcloudModel = require('./src/models/sonarcloud');
 const doraModel = require('./src/models/dora');
 const sonarcloudDetails = require('./src/services/sonarcloud-details');
@@ -449,8 +450,16 @@ async function startServer() {
     process.exit(1);
   }
 
+  // Garantir que as funções do banco existem
+  try {
+    await ensureDatabaseFunctions();
+  } catch (err) {
+    console.warn('⚠️  Aviso ao verificar funções do banco:', err.message);
+    // Não interrompe a inicialização
+  }
+
   // Coletar métricas iniciais
-  console.log('\n📊 Coletando métricas iniciais...');
+  console.log('📊 Coletando métricas iniciais...');
   await collectMetrics();
 
   // Configurar coleta automática a cada 10 minutos
