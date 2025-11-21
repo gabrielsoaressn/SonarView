@@ -92,8 +92,8 @@ if issues_data and issues_data.get('total', 0) > 0:
 else:
     st.success("✅ Nenhum problema encontrado em código novo!")
 
-# --- Hotspots de Código ---
-st.header("Hotspots de Código para Refatoração", divider='orange')
+# --- Pontos de Atenção no Código ---
+st.header("Pontos de Atenção no Código para Refatoração", divider='orange')
 size = latest_data.get('size', {})
 duplication = latest_data.get('duplication', {})
 
@@ -123,7 +123,7 @@ if complexity_data and complexity_data.get('stats'):
 
     # Tabela dos top 10 mais complexos
     if hotspots:
-        st.subheader("🔥 Top 10 Arquivos Mais Complexos")
+        st.subheader("⚠️ Top 10 Arquivos Mais Complexos")
         df_complexity = pd.DataFrame(hotspots)
 
         # Criar gráfico de barras

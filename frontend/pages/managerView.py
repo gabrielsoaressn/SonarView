@@ -58,9 +58,9 @@ with col3:
         total_deploys = deploy_freq.get('total', 0)
 
     st.metric(
-        label="Lead Time para Mudanças",
+        label="⏱️ Lead Time para Mudanças",
         value=lead_time_value,
-        help=f"Tempo médio desde o commit até a produção. {'Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
+        help=f"📊 Métrica DORA\n\nTempo médio desde o commit até a produção (deploy).\n\n🎯 Classificação:\n• Elite: < 1 hora\n• Alto: < 1 dia\n• Médio: 1 dia - 1 semana\n• Baixo: > 1 semana\n\n{'📈 Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else '⚠️ Nenhum deploy registrado ainda.'}"
     )
 with col4:
     cfr_value = "*"
@@ -71,13 +71,13 @@ with col4:
             cfr_value = f"{cfr_data['rate']}%"
 
     st.metric(
-        label="Change Failure Rate",
+        label="🚨 Change Failure Rate",
         value=cfr_value,
-        help=f"Percentual de deploys que causam falhas em produção. {'Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else 'Nenhum deploy registrado ainda.'}"
+        help=f"📊 Métrica DORA\n\nPercentual de deploys que causam falhas em produção (requerem hotfix, rollback ou patch).\n\n🎯 Classificação:\n• Elite: 0-15%\n• Alto: 16-30%\n• Médio: 31-45%\n• Baixo: > 45%\n\n{'📈 Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else '⚠️ Nenhum deploy registrado ainda.'}"
     )
 
 # --- Quality Gate para Código Novo ---
-st.subheader("Quality Gate em Código Novo (Leak Period)")
+st.subheader("Quality Gate em Código Novo")
 new_code = latest_data.get('newCode', {})
 
 col1, col2 = st.columns(2)

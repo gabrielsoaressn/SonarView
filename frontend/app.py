@@ -210,7 +210,7 @@ def main():
     else:
         st.info("Dados insuficientes para gerar o gráfico de radar.")
 
-    st.header("🔍 Foco no Código Novo (Leak Period)", divider='rainbow')
+    st.header("🔍 Foco no Código Novo", divider='rainbow')
     
     new_code = data.get('newCode', {})
     
