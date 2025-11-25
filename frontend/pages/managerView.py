@@ -76,8 +76,8 @@ with col4:
         help=f"📊 Métrica DORA\n\nPercentual de deploys que causam falhas em produção (requerem hotfix, rollback ou patch).\n\n🎯 Classificação:\n• Elite: 0-15%\n• Alto: 16-30%\n• Médio: 31-45%\n• Baixo: > 45%\n\n{'📈 Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else '⚠️ Nenhum deploy registrado ainda.'}"
     )
 
-# --- Quality Gate para Código Novo ---
-st.subheader("Quality Gate em Código Novo")
+# --- Limiar de Qualidade para Código Novo ---
+st.subheader("Limiar de Qualidade em Código Novo")
 new_code = latest_data.get('newCode', {})
 
 col1, col2 = st.columns(2)

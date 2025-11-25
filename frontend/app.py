@@ -74,12 +74,12 @@ def main():
         render_no_data()
         return
     
-    # Seção de Quality Gate
-    st.header("🚦 Quality Gate", divider='rainbow')
-    
+    # Seção de Limiar de Qualidade
+    st.header("🚦 Limiar de Qualidade", divider='rainbow')
+
     qg_status = "Aprovado" if data.get('overallRating') == 'A' else "Reprovado"
     qg_color = "green" if qg_status == "Aprovado" else "red"
-    
+
     st.markdown(f"### Status Geral: <span style='color:{qg_color};'>{qg_status}</span>", unsafe_allow_html=True)
     
     col1, col2, col3, col4 = st.columns(4)
