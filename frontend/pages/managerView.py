@@ -9,7 +9,7 @@ st.set_page_config(page_title="Visão Gerencial", page_icon="👨‍💼", layou
 
 # Título e descrição
 st.title("👨‍💼 Visão Gerencial")
-st.markdown("Métricas e KPIs para gestores acompanharem a saúde do projeto e tomarem decisões estratégicas.")
+st.markdown("Métricas e Indicadores-Chave de Desempenho para gestores acompanharem a saúde do projeto e tomarem decisões estratégicas.")
 
 # Sidebar e seleção de projeto
 project_id = display_sidebar()
@@ -28,7 +28,7 @@ if not latest_data:
     st.stop()
 
 # --- Métricas Chave ---
-st.header("KPIs Principais", divider='blue')
+st.header("Indicadores-Chave de Desempenho Principais", divider='blue')
 maintainability = latest_data.get('maintainability', {})
 
 col1, col2, col3, col4 = st.columns(4)
@@ -58,7 +58,7 @@ with col3:
         total_deploys = deploy_freq.get('total', 0)
 
     st.metric(
-        label="⏱️ Lead Time para Mudanças",
+        label="⏱️ Tempo de Espera para Mudanças",
         value=lead_time_value,
         help=f"📊 Métrica DORA\n\nTempo médio desde o commit até a produção (deploy).\n\n🎯 Classificação:\n• Elite: < 1 hora\n• Alto: < 1 dia\n• Médio: 1 dia - 1 semana\n• Baixo: > 1 semana\n\n{'📈 Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else '⚠️ Nenhum deploy registrado ainda.'}"
     )
@@ -71,7 +71,7 @@ with col4:
             cfr_value = f"{cfr_data['rate']}%"
 
     st.metric(
-        label="🚨 Change Failure Rate",
+        label="🚨 Taxa de Falha em Mudanças",
         value=cfr_value,
         help=f"📊 Métrica DORA\n\nPercentual de deploys que causam falhas em produção (requerem hotfix, rollback ou patch).\n\n🎯 Classificação:\n• Elite: 0-15%\n• Alto: 16-30%\n• Médio: 31-45%\n• Baixo: > 45%\n\n{'📈 Baseado em ' + str(total_deploys) + ' deploys nos últimos 30 dias.' if dora_data else '⚠️ Nenhum deploy registrado ainda.'}"
     )
@@ -124,8 +124,8 @@ with col2:
             df_history,
             x='timestamp',
             y='technicalDebtHours',
-            title="Evolução da Dívida Técnica (em horas)",
-            labels={'timestamp': 'Data', 'technicalDebtHours': 'Dívida (horas)'},
+            title="Evolução da Dívida Técnica",
+            labels={'timestamp': 'Período', 'technicalDebtHours': 'Dívida (horas)'},
             markers=True
         )
         fig_line.update_layout(
