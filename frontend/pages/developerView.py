@@ -14,7 +14,6 @@ st.set_page_config(page_title="Visão do Desenvolvedor", page_icon="👩‍💻"
 
 # Título e descrição
 st.title("👩‍💻 Visão do Desenvolvedor")
-st.markdown("Métricas detalhadas para apoiar as atividades diárias de desenvolvimento e refatoração.")
 
 # Sidebar e seleção de projeto
 project_id = display_sidebar()
@@ -31,7 +30,7 @@ if not latest_data:
     st.stop()
 
 # --- Foco em Código Novo ---
-st.header("Ações Imediatas em Código Novo", divider='orange')
+st.header("Código Novo", divider='orange')
 new_code = latest_data.get('newCode', {})
 
 col1, col2, col3 = st.columns(3)
