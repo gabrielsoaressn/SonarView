@@ -161,88 +161,60 @@ else:
 st.header("Qualidade e Cobertura de Testes", divider='orange')
 coverage = latest_data.get('coverage', {})
 
-col1, col2 = st.columns(2)
-with col1:
-    # Gráfico de Rosca para Cobertura
-    st.subheader("Cobertura de Testes")
-    overall_coverage = coverage.get('overall', '*')
+# Linhas Não Cobertas por Testes
+st.subheader("Linhas Cobertas por Testes")
 
-    # Verificar se o valor é numérico
-    if not is_numeric_value(overall_coverage):
-        st.info("📊 Dados de cobertura não disponíveis no SonarCloud.\n\nConfigure a análise de cobertura no seu projeto para ver métricas detalhadas.")
-    else:
-        # Converter para número
-        coverage_numeric = float(overall_coverage)
+coverage_data = get_coverage_by_file(project_id)
 
-        fig_donut = go.Figure(go.Indicator(
-            mode="gauge+number+delta",
-            value=coverage_numeric,
-            title={'text': "Cobertura Geral (%)"},
-            domain={'x': [0, 1], 'y': [0, 1]},
-            gauge={
-                'axis': {'range': [0, 100]},
-                'bar': {'color': '#10B981'},
-                'steps': [
-                    {'range': [0, 50], 'color': '#F87171'},
-                    {'range': [50, 80], 'color': '#FBBF24'},
-                    {'range': [80, 100], 'color': '#D1FAE5'}
-                ],
-                'threshold': {
-                    'line': {'color': "red", 'width': 4},
-                    'thickness': 0.75,
-                    'value': 80
-                }
-            }
-        ))
-        fig_donut.update_layout(height=400)
-        st.plotly_chart(fig_donut, use_container_width=True)
+if coverage_data and coverage_data.get('worstCoverage'):
+    worst = coverage_data['worstCoverage'][:10]  # Top 10 com pior cobertura
 
-with col2:
-    # Linhas Não Cobertas por Testes
-    st.subheader("Linhas Não Cobertas por Testes")
+    if worst:
+        df_coverage = pd.DataFrame(worst)
+        total_uncovered = df_coverage['uncoveredLines'].sum()
+        total_covered = df_coverage['coveredLines'].sum()
 
-    coverage_data = get_coverage_by_file(project_id)
-
-    if coverage_data and coverage_data.get('worstCoverage'):
-        worst = coverage_data['worstCoverage'][:10]  # Top 10 com pior cobertura
-
-        if worst:
-            df_coverage = pd.DataFrame(worst)
-            total_uncovered = df_coverage['uncoveredLines'].sum()
-
+        col1, col2 = st.columns(2)
+        with col1:
+            st.metric(
+                "Total de Linhas Cobertas",
+                f"{int(total_covered):,}",
+                help="Número total de linhas com cobertura de testes"
+            )
+        with col2:
             st.metric(
                 "Total de Linhas Não Cobertas",
                 f"{int(total_uncovered):,}",
                 help="Número total de linhas sem cobertura de testes"
             )
 
-            # Gráfico de barras
-            fig = px.bar(
-                df_coverage,
-                x='uncoveredLines',
-                y='name',
-                orientation='h',
-                title='Top 10 Arquivos com Mais Linhas Não Cobertas',
-                labels={'uncoveredLines': 'Linhas Não Cobertas', 'name': 'Arquivo'},
-                color='coverage',
-                color_continuous_scale='RdYlGn'
-            )
-            fig.update_layout(
-                height=400,
-                font=dict(size=14),
-                title_font_size=18,
-                xaxis=dict(title_font_size=16),
-                yaxis=dict(title_font_size=16, tickfont=dict(size=13))
-            )
-            st.plotly_chart(fig, use_container_width=True)
+        # Gráfico de barras
+        fig = px.bar(
+            df_coverage,
+            x='uncoveredLines',
+            y='name',
+            orientation='h',
+            title='Top 10 Arquivos com Mais Linhas Não Cobertas',
+            labels={'uncoveredLines': 'Linhas Não Cobertas', 'name': 'Arquivo'},
+            color='coverage',
+            color_continuous_scale='RdYlGn'
+        )
+        fig.update_layout(
+            height=400,
+            font=dict(size=14),
+            title_font_size=18,
+            xaxis=dict(title_font_size=16),
+            yaxis=dict(title_font_size=16, tickfont=dict(size=13))
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
-            # Tabela
-            st.dataframe(
-                df_coverage[['name', 'coverage', 'uncoveredLines', 'linesToCover']],
-                use_container_width=True,
-                hide_index=True
-            )
-        else:
-            st.success("✅ Cobertura de testes excelente!")
+        # Tabela
+        st.dataframe(
+            df_coverage[['name', 'coverage', 'uncoveredLines', 'linesToCover']],
+            use_container_width=True,
+            hide_index=True
+        )
     else:
-        st.info("📊 Dados de cobertura não disponíveis no SonarCloud.\n\nConfigure a análise de cobertura no seu projeto.")
+        st.success("✅ Cobertura de testes excelente!")
+else:
+    st.info("📊 Dados de cobertura não disponíveis no SonarCloud.\n\nConfigure a análise de cobertura no seu projeto.")
