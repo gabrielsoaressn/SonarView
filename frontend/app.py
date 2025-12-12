@@ -185,22 +185,22 @@ def main():
 
             # Confiabilidade
             st.markdown(f"**🔧 Confiabilidade**")
-            st.markdown(f"Rating: `{radar_data['ratings']['reliability']}` | Score: `{radar_data['scores'][0]:.0f}/100`")
+            st.markdown(f"Score: `{radar_data['scores'][0]:.0f}/100`")
             st.caption("Baseado em bugs e rating de confiabilidade")
 
             # Segurança
             st.markdown(f"**🔒 Segurança**")
-            st.markdown(f"Rating: `{radar_data['ratings']['security']}` | Score: `{radar_data['scores'][1]:.0f}/100`")
+            st.markdown(f"Score: `{radar_data['scores'][1]:.0f}/100`")
             st.caption("Baseado em vulnerabilidades e rating de segurança")
 
             # Manutenibilidade
             st.markdown(f"**🔨 Manutenibilidade**")
-            st.markdown(f"Rating: `{radar_data['ratings']['maintainability']}` | Score: `{radar_data['scores'][2]:.0f}/100`")
+            st.markdown(f"Score: `{radar_data['scores'][2]:.0f}/100`")
             st.caption("Baseado em code smells e dívida técnica")
 
             # Cobertura de Testes
             st.markdown(f"**🧪 Cobertura de Testes**")
-            st.markdown(f"Cobertura: `{radar_data['ratings']['coverage']}` | Score: `{radar_data['scores'][3]:.0f}/100`")
+            st.markdown(f"Score: `{radar_data['scores'][3]:.0f}/100`")
             st.caption("Porcentagem de código coberto por testes")
 
             # Qualidade do Código
