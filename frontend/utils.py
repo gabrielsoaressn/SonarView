@@ -161,8 +161,11 @@ def format_lead_time(minutes):
     if minutes is None or minutes < 0:
         return '*'
 
-    if minutes < 60:
-        return f"{minutes}min"
+    if minutes < 1:
+        seconds = int(minutes * 60)
+        return f"{seconds}s"
+    elif minutes < 60:
+        return f"{int(minutes)}min"
     elif minutes < 1440:  # menos de 1 dia
         hours = minutes / 60
         return f"{hours:.1f}h"
