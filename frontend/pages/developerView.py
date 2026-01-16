@@ -171,6 +171,8 @@ if coverage_data and coverage_data.get('worstCoverage'):
 
     if worst:
         df_coverage = pd.DataFrame(worst)
+        # Calcular linhas cobertas: linesToCover - uncoveredLines
+        df_coverage['coveredLines'] = df_coverage['linesToCover'] - df_coverage['uncoveredLines']
         total_uncovered = df_coverage['uncoveredLines'].sum()
         total_covered = df_coverage['coveredLines'].sum()
 
